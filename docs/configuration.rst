@@ -8,7 +8,7 @@ Cache aliases
 
 The caches module allows to setup cache configurations and then use them either using an alias or retrieving the config explicitly. To set the config, call ``caches.set_config``:
 
-.. automethod:: aiocache.caches.set_config
+.. automethod:: pycached.caches.set_config
 
 To retrieve a copy of the current config, you can use ``caches.get_config`` or ``caches.get_alias_config`` for an alias config.
 

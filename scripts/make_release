@@ -4,7 +4,7 @@ SCRIPT=$(readlink -f "$0")
 pushd $(dirname "$SCRIPT")
 cd ..
 
-version=$(grep -o -E "([0-9]+\.[0-9]+\.[0-9]+)" aiocache/_version.py)
+version=$(grep -o -E "([0-9]+\.[0-9]+\.[0-9]+)" pycached/_version.py)
 echo -n "New version number (current is $version): "
 read new_version
 gitchangelog ^$version HEAD | sed "s/Unreleased/$new_version (`date +%Y-%m-%d`)/g" > _release_notes
@@ -14,9 +14,9 @@ read answer
 
 if echo "$answer" | grep -iq "^y" ;then
   echo "Generating new release..."
-  sed -i "s/$version/$new_version/" aiocache/_version.py
+  sed -i "s/$version/$new_version/" pycached/_version.py
   sed -i '1s/^/# Changelog\n\n\n/' _release_notes && sed -i '1,3d' CHANGELOG.md && cat CHANGELOG.md >> _release_notes && mv _release_notes CHANGELOG.md
-  git add CHANGELOG.md aiocache/_version.py
+  git add CHANGELOG.md pycached/_version.py
   git commit -m "Bump version $new_version"
   git tag -a "$new_version" -m "$new_version"
   git push --follow-tags

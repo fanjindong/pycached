@@ -1,54 +1,54 @@
 import asyncio
 
-from aiocache import caches, SimpleMemoryCache, RedisCache
-from aiocache.serializers import StringSerializer, PickleSerializer
+from pycached import caches, SimpleMemoryCache, RedisCache
+from pycached.serializers import StringSerializer, PickleSerializer
 
 caches.set_config({
     'default': {
-        'cache': "aiocache.SimpleMemoryCache",
+        'cache': "pycached.SimpleMemoryCache",
         'serializer': {
-            'class': "aiocache.serializers.StringSerializer"
+            'class': "pycached.serializers.StringSerializer"
         }
     },
     'redis_alt': {
-        'cache': "aiocache.RedisCache",
+        'cache': "pycached.RedisCache",
         'endpoint': "127.0.0.1",
         'port': 6379,
         'timeout': 1,
         'serializer': {
-            'class': "aiocache.serializers.PickleSerializer"
+            'class': "pycached.serializers.PickleSerializer"
         },
         'plugins': [
-            {'class': "aiocache.plugins.HitMissRatioPlugin"},
-            {'class': "aiocache.plugins.TimingPlugin"}
+            {'class': "pycached.plugins.HitMissRatioPlugin"},
+            {'class': "pycached.plugins.TimingPlugin"}
         ]
     }
 })
 
 
-async def default_cache():
+def default_cache():
     cache = caches.get('default')   # This always returns the same instance
-    await cache.set("key", "value")
+    cache.set("key", "value")
 
-    assert await cache.get("key") == "value"
+    assert cache.get("key") == "value"
     assert isinstance(cache, SimpleMemoryCache)
     assert isinstance(cache.serializer, StringSerializer)
 
 
-async def alt_cache():
+def alt_cache():
     # This generates a new instance every time! You can also use `caches.create('alt')`
     # or even `caches.create('alt', namespace="test", etc...)` to override extra args
     cache = caches.create(**caches.get_alias_config('redis_alt'))
-    await cache.set("key", "value")
+    cache.set("key", "value")
 
-    assert await cache.get("key") == "value"
+    assert cache.get("key") == "value"
     assert isinstance(cache, RedisCache)
     assert isinstance(cache.serializer, PickleSerializer)
     assert len(cache.plugins) == 2
     assert cache.endpoint == "127.0.0.1"
     assert cache.timeout == 1
     assert cache.port == 6379
-    await cache.close()
+    cache.close()
 
 
 def test_alias():

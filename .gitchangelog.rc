@@ -148,7 +148,7 @@ body_process = Wrap(regexp=r'\n(?=\w+\s*:)')
 ##     ReSub(r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n@]*)(@[a-z]+\s+)*$', r'\4') |
 ##     SetIfEmpty("No commit message.") | ucfirst | final_dot)
 subject_process = (strip |
-  ReSub(r'\(#([0-9]+)\)', r'[#\1](https://github.com/argaen/aiocache/issues/\1)') |
+  ReSub(r'\(#([0-9]+)\)', r'[#\1](https://github.com/argaen/pycached/issues/\1)') |
   ReSub(r'^[nN]ew\s*:\s*|^[cC]hg\s*:\s*|^[fF]ix\s*:\s*', r'') |
   ucfirst | final_dot)
 

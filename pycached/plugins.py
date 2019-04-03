@@ -3,7 +3,7 @@ This module implements different plugins you can attach to your cache instance. 
 are coded in a collaborative so you can use multiple inheritance.
 """
 
-from aiocache.base import API
+from pycached.base import API
 
 
 class BasePlugin:
@@ -12,7 +12,7 @@ class BasePlugin:
         for hook in hooks:
             setattr(cls, hook, func)
 
-    async def do_nothing(self, *args, **kwargs):
+    def do_nothing(self, *args, **kwargs):
         pass
 
 
@@ -33,7 +33,7 @@ class TimingPlugin(BasePlugin):
 
     @classmethod
     def save_time(cls, method):
-        async def do_save_time(self, client, *args, took=0, **kwargs):
+        def do_save_time(self, client, *args, took=0, **kwargs):
             if not hasattr(client, "profiling"):
                 client.profiling = {}
 
@@ -68,7 +68,7 @@ class HitMissRatioPlugin(BasePlugin):
     keys.
     """
 
-    async def post_get(self, client, key, took=0, ret=None):
+    def post_get(self, client, key, took=0, ret=None):
         if not hasattr(client, "hit_miss_ratio"):
             client.hit_miss_ratio = {}
             client.hit_miss_ratio["total"] = 0
@@ -82,7 +82,7 @@ class HitMissRatioPlugin(BasePlugin):
             client.hit_miss_ratio["hits"] / client.hit_miss_ratio["total"]
         )
 
-    async def post_multi_get(self, client, keys, took=0, ret=None):
+    def post_multi_get(self, client, keys, took=0, ret=None):
         if not hasattr(client, "hit_miss_ratio"):
             client.hit_miss_ratio = {}
             client.hit_miss_ratio["total"] = 0

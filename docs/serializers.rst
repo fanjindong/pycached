@@ -7,8 +7,8 @@ Serializers can be attached to backends in order to serialize/deserialize data s
 
 To use a specific serializer::
 
-    >>> from aiocache import SimpleMemoryCache
-    >>> from aiocache.serializers import PickleSerializer
+    >>> from pycached import SimpleMemoryCache
+    >>> from pycached.serializers import PickleSerializer
     cache = SimpleMemoryCache(serializer=PickleSerializer())
 
 Currently the following are built in:
@@ -18,7 +18,7 @@ Currently the following are built in:
 
 NullSerializer
 --------------
-.. autoclass:: aiocache.serializers.NullSerializer
+.. autoclass:: pycached.serializers.NullSerializer
   :members:
 
 
@@ -27,7 +27,7 @@ NullSerializer
 StringSerializer
 ----------------
 
-.. autoclass:: aiocache.serializers.StringSerializer
+.. autoclass:: pycached.serializers.StringSerializer
   :members:
 
 ..  _pickleserializer:
@@ -35,7 +35,7 @@ StringSerializer
 PickleSerializer
 ----------------
 
-.. autoclass:: aiocache.serializers.PickleSerializer
+.. autoclass:: pycached.serializers.PickleSerializer
   :members:
 
 ..  _jsonserializer:
@@ -43,7 +43,7 @@ PickleSerializer
 JsonSerializer
 --------------
 
-.. autoclass:: aiocache.serializers.JsonSerializer
+.. autoclass:: pycached.serializers.JsonSerializer
   :members:
 
 ..  _msgpackserializer:
@@ -51,7 +51,7 @@ JsonSerializer
 MsgPackSerializer
 -----------------
 
-.. autoclass:: aiocache.serializers.MsgPackSerializer
+.. autoclass:: pycached.serializers.MsgPackSerializer
   :members:
 
 In case the current serializers are not covering your needs, you can always define your custom serializer as shown in ``examples/serializer_class.py``:

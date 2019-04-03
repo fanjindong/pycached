@@ -2,13 +2,13 @@ import asyncio
 
 from asynctest import MagicMock
 
-from aiocache.base import BaseCache
+from pycached.base import BaseCache
 
 
-async def async_main():
+def async_main():
     mocked_cache = MagicMock(spec=BaseCache)
     mocked_cache.get.return_value = "world"
-    print(await mocked_cache.get("hello"))
+    print(mocked_cache.get("hello"))
 
 
 if __name__ == "__main__":

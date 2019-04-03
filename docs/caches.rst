@@ -37,7 +37,7 @@ The supported commands are:
   - clear
   - raw
 
-If you feel a command is missing here do not hesitate to `open an issue <https://github.com/argaen/aiocache/issues>`_
+If you feel a command is missing here do not hesitate to `open an issue <https://github.com/argaen/pycached/issues>`_
 
 
 ..  _basecache:
@@ -45,7 +45,7 @@ If you feel a command is missing here do not hesitate to `open an issue <https:/
 BaseCache
 ---------
 
-.. autoclass:: aiocache.base.BaseCache
+.. autoclass:: pycached.base.BaseCache
   :members:
 
 
@@ -54,7 +54,7 @@ BaseCache
 RedisCache
 ----------
 
-.. autoclass:: aiocache.RedisCache
+.. autoclass:: pycached.RedisCache
   :members:
 
 
@@ -63,7 +63,7 @@ RedisCache
 SimpleMemoryCache
 -----------------
 
-.. autoclass:: aiocache.SimpleMemoryCache
+.. autoclass:: pycached.SimpleMemoryCache
   :members:
 
 
@@ -72,5 +72,5 @@ SimpleMemoryCache
 MemcachedCache
 --------------
 
-.. autoclass:: aiocache.MemcachedCache
+.. autoclass:: pycached.MemcachedCache
   :members:

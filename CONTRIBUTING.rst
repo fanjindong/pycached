@@ -1,7 +1,7 @@
 Contributing
 ============
 
-#. Clone the repository with ``git clone git@github.com:argaen/aiocache.git``
+#. Clone the repository with ``git clone git@github.com:argaen/pycached.git``
 #. Install dependencies with ``make install-dev`` (you will need ``pipenv`` which you can install with ``pip install pipenv``)
 #. Make a change (means writing code, tests without reducing coverage and docs)
 #. Ensure syntax is correct with ``make lint``. If there are errors, you can format the code with ``make format``

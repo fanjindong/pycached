@@ -1,8 +1,8 @@
 import asyncio
 import zlib
 
-from aiocache import RedisCache
-from aiocache.serializers import BaseSerializer
+from pycached import RedisCache
+from pycached.serializers import BaseSerializer
 
 
 class CompressionSerializer(BaseSerializer):
@@ -28,7 +28,7 @@ class CompressionSerializer(BaseSerializer):
 cache = RedisCache(serializer=CompressionSerializer(), namespace="main")
 
 
-async def serializer():
+def serializer():
     text = (
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
         "ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation"
@@ -36,10 +36,10 @@ async def serializer():
         "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur"
         "sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit"
         "anim id est laborum.")
-    await cache.set("key", text)
+    cache.set("key", text)
     print("-----------------------------------")
-    real_value = await cache.get("key")
-    compressed_value = await cache.raw("get", "main:key")
+    real_value = cache.get("key")
+    compressed_value = cache.raw("get", "main:key")
     assert len(compressed_value) < len(real_value.encode())
 
 

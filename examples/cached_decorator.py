@@ -2,15 +2,15 @@ import asyncio
 
 from collections import namedtuple
 
-from aiocache import cached, RedisCache
-from aiocache.serializers import PickleSerializer
+from pycached import cached, RedisCache
+from pycached.serializers import PickleSerializer
 
 Result = namedtuple('Result', "content, status")
 
 
 @cached(
     ttl=10, cache=RedisCache, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
-async def cached_call():
+def cached_call():
     return Result("content", 200)
 
 

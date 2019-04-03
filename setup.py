@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 with open(
         os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
-            'aiocache/_version.py')) as fp:
+            'pycached/_version.py')) as fp:
     try:
         version = re.findall(
             r"^__version__ = \"([^']+)\"\r?$", fp.read(), re.M)[0]
@@ -19,10 +19,10 @@ with open('README.rst', 'rt', encoding='utf8') as f:
 
 
 setup(
-    name='aiocache',
+    name='pycached',
     version=version,
     author='Manuel Miranda',
-    url='https://github.com/argaen/aiocache',
+    url='https://github.com/argaen/pycached',
     author_email='manu.mirandad@gmail.com',
     description='multi backend asyncio cache',
     long_description=readme,

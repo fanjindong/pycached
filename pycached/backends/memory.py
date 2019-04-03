@@ -1,7 +1,7 @@
-import asyncio
+from threading import Timer
 
-from aiocache.base import BaseCache
-from aiocache.serializers import NullSerializer
+from pycached.base import BaseCache
+from pycached.serializers import NullSerializer
 
 
 class SimpleMemoryBackend:
@@ -15,16 +15,16 @@ class SimpleMemoryBackend:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    async def _get(self, key, encoding="utf-8", _conn=None):
+    def _get(self, key, _conn=None):
         return SimpleMemoryBackend._cache.get(key)
 
-    async def _gets(self, key, encoding="utf-8", _conn=None):
-        return await self._get(key, encoding=encoding, _conn=_conn)
+    def _gets(self, key, _conn=None):
+        return self._get(key, _conn=_conn)
 
-    async def _multi_get(self, keys, encoding="utf-8", _conn=None):
+    def _multi_get(self, keys, _conn=None):
         return [SimpleMemoryBackend._cache.get(key) for key in keys]
 
-    async def _set(self, key, value, ttl=None, _cas_token=None, _conn=None):
+    def _set(self, key, value, ttl=None, _cas_token=None, _conn=None):
         if _cas_token is not None and _cas_token != SimpleMemoryBackend._cache.get(key):
             return 0
 
@@ -33,26 +33,28 @@ class SimpleMemoryBackend:
 
         SimpleMemoryBackend._cache[key] = value
         if ttl:
-            loop = asyncio.get_event_loop()
-            SimpleMemoryBackend._handlers[key] = loop.call_later(ttl, self.__delete, key)
+            handle = Timer(ttl, self.__delete, args=[key])
+            handle.start()
+            SimpleMemoryBackend._handlers[key] = handle
+
         return True
 
-    async def _multi_set(self, pairs, ttl=None, _conn=None):
+    def _multi_set(self, pairs, ttl=None, _conn=None):
         for key, value in pairs:
-            await self._set(key, value, ttl=ttl)
+            self._set(key, value, ttl=ttl)
         return True
 
-    async def _add(self, key, value, ttl=None, _conn=None):
+    def _add(self, key, value, ttl=None, _conn=None):
         if key in SimpleMemoryBackend._cache:
             raise ValueError("Key {} already exists, use .set to update the value".format(key))
 
-        await self._set(key, value, ttl=ttl)
+        self._set(key, value, ttl=ttl)
         return True
 
-    async def _exists(self, key, _conn=None):
+    def _exists(self, key, _conn=None):
         return key in SimpleMemoryBackend._cache
 
-    async def _increment(self, key, delta, _conn=None):
+    def _increment(self, key, delta, _conn=None):
         if key not in SimpleMemoryBackend._cache:
             SimpleMemoryBackend._cache[key] = delta
         else:
@@ -62,22 +64,23 @@ class SimpleMemoryBackend:
                 raise TypeError("Value is not an integer") from None
         return SimpleMemoryBackend._cache[key]
 
-    async def _expire(self, key, ttl, _conn=None):
+    def _expire(self, key, ttl, _conn=None):
         if key in SimpleMemoryBackend._cache:
             handle = SimpleMemoryBackend._handlers.pop(key, None)
             if handle:
                 handle.cancel()
             if ttl:
-                loop = asyncio.get_event_loop()
-                SimpleMemoryBackend._handlers[key] = loop.call_later(ttl, self.__delete, key)
+                handle = Timer(ttl, self.__delete, args=[key])
+                handle.start()
+                SimpleMemoryBackend._handlers[key] = handle
             return True
 
         return False
 
-    async def _delete(self, key, _conn=None):
+    def _delete(self, key, _conn=None):
         return self.__delete(key)
 
-    async def _clear(self, namespace=None, _conn=None):
+    def _clear(self, namespace=None, _conn=None):
         if namespace:
             for key in list(SimpleMemoryBackend._cache):
                 if key.startswith(namespace):
@@ -87,10 +90,10 @@ class SimpleMemoryBackend:
             SimpleMemoryBackend._handlers = {}
         return True
 
-    async def _raw(self, command, *args, encoding="utf-8", _conn=None, **kwargs):
+    def _raw(self, command, *args, _conn=None, **kwargs):
         return getattr(SimpleMemoryBackend._cache, command)(*args, **kwargs)
 
-    async def _redlock_release(self, key, value):
+    def _redlock_release(self, key, value):
         if SimpleMemoryBackend._cache.get(key) == value:
             SimpleMemoryBackend._cache.pop(key)
             return 1
@@ -123,6 +126,12 @@ class SimpleMemoryCache(SimpleMemoryBackend, BaseCache):
         By default its 5.
     """
 
+    NAME = "memory"
+
     def __init__(self, serializer=None, **kwargs):
         super().__init__(**kwargs)
         self.serializer = serializer or NullSerializer()
+
+    @classmethod
+    def parse_uri_path(cls, path):
+        return {}

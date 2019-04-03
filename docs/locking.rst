@@ -20,7 +20,7 @@ There are a couple of locking implementations than can help you to protect again
 RedLock
 -------
 
-.. autoclass:: aiocache.lock.RedLock
+.. autoclass:: pycached.lock.RedLock
   :members:
 
 
@@ -29,5 +29,5 @@ RedLock
 OptimisticLock
 --------------
 
-.. autoclass:: aiocache.lock.OptimisticLock
+.. autoclass:: pycached.lock.OptimisticLock
   :members:

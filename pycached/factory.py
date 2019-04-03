@@ -30,8 +30,8 @@ class CacheHandler:
 
     _config = {
         "default": {
-            "cache": "aiocache.SimpleMemoryCache",
-            "serializer": {"class": "aiocache.serializers.StringSerializer"},
+            "cache": "pycached.SimpleMemoryCache",
+            "serializer": {"class": "pycached.serializers.StringSerializer"},
         }
     }
 
@@ -97,21 +97,21 @@ class CacheHandler:
 
             {
                 'default': {
-                    'cache': "aiocache.SimpleMemoryCache",
+                    'cache': "pycached.SimpleMemoryCache",
                     'serializer': {
-                        'class': "aiocache.serializers.StringSerializer"
+                        'class': "pycached.serializers.StringSerializer"
                     }
                 },
                 'redis_alt': {
-                    'cache': "aiocache.RedisCache",
+                    'cache': "pycached.RedisCache",
                     'endpoint': "127.0.0.10",
                     'port': 6378,
                     'serializer': {
-                        'class': "aiocache.serializers.PickleSerializer"
+                        'class': "pycached.serializers.PickleSerializer"
                     },
                     'plugins': [
-                        {'class': "aiocache.plugins.HitMissRatioPlugin"},
-                        {'class': "aiocache.plugins.TimingPlugin"}
+                        {'class': "pycached.plugins.HitMissRatioPlugin"},
+                        {'class': "pycached.plugins.TimingPlugin"}
                     ]
                 }
             }
@@ -121,9 +121,9 @@ class CacheHandler:
 
             {
                 'default': {
-                    'cache': "aiocache.SimpleMemoryCache",
+                    'cache': "pycached.SimpleMemoryCache",
                     'serializer': {
-                        'class': "aiocache.serializers.StringSerializer"
+                        'class': "pycached.serializers.StringSerializer"
                     }
                 }
             }

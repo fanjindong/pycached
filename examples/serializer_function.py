@@ -2,7 +2,7 @@ import asyncio
 import json
 
 from marshmallow import Schema, fields, post_load
-from aiocache import RedisCache
+from pycached import RedisCache
 
 
 class MyType:
@@ -31,15 +31,15 @@ def loads(value):
 cache = RedisCache(namespace="main")
 
 
-async def serializer_function():
-    await cache.set("key", MyType(1, 2), dumps_fn=dumps)
+def serializer_function():
+    cache.set("key", MyType(1, 2), dumps_fn=dumps)
 
-    obj = await cache.get("key", loads_fn=loads)
+    obj = cache.get("key", loads_fn=loads)
 
     assert obj.x == 1
     assert obj.y == 2
-    assert await cache.get("key") == json.loads(('{"y": 2.0, "x": 1.0}'))
-    assert json.loads(await cache.raw("get", "main:key")) == {"y": 2.0, "x": 1.0}
+    assert cache.get("key") == json.loads(('{"y": 2.0, "x": 1.0}'))
+    assert json.loads(cache.raw("get", "main:key")) == {"y": 2.0, "x": 1.0}
 
 
 def test_serializer_function():

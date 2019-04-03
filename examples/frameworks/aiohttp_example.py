@@ -1,16 +1,16 @@
 from datetime import datetime
 from aiohttp import web
-from aiocache import cached
-from aiocache.serializers import JsonSerializer
+from pycached import cached
+from pycached.serializers import JsonSerializer
 
 
 @cached(key="my_custom_key", serializer=JsonSerializer())
-async def time():
+def time():
     return {"time": datetime.now().isoformat()}
 
 
-async def handle(request):
-    return web.json_response(await time())
+def handle(request):
+    return web.json_response(time())
 
 
 if __name__ == "__main__":

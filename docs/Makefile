@@ -91,9 +91,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/aiocache.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/pycached.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/aiocache.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/pycached.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -110,8 +110,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/aiocache"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/aiocache"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/pycached"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/pycached"
 	@echo "# devhelp"
 
 .PHONY: epub

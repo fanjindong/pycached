@@ -1,7 +1,7 @@
 Testing
 =======
 
-It's really easy to cut the dependency with aiocache functionality:
+It's really easy to cut the dependency with pycached functionality:
 
 ..  literalinclude:: ../examples/testing.py
 

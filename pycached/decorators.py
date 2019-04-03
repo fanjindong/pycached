@@ -2,9 +2,9 @@ import inspect
 import functools
 import logging
 
-from aiocache import SimpleMemoryCache, caches
-from aiocache.base import SENTINEL
-from aiocache.lock import RedLock
+from pycached import caches, SimpleMemoryCache
+from pycached.base import SENTINEL
+from pycached.lock import RedLock
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class cached:
     The cache is available in the function object as ``<function_name>.cache``.
 
     In some cases you will need to send more args to configure the cache object.
-    An example would be endpoint and port for the RedisCache. You can send those args as
+    An example would be endpoint and port for the SimpleMemoryCache. You can send those args as
     kwargs and they will be propagated accordingly.
 
     Only one cache instance is created per decorated call. If you expect high concurrency of calls
@@ -32,7 +32,7 @@ class cached:
     :param key_builder: Callable that allows to build the function dynamically. It receives
         the function plus same args and kwargs passed to the function.
     :param cache: cache class to use when calling the ``set``/``get`` operations.
-        Default is ``aiocache.SimpleMemoryCache``.
+        Default is ``pycached.SimpleMemoryCache``.
     :param serializer: serializer instance to use when calling the ``dumps``/``loads``.
         If its None, default one from the cache backend is used.
     :param plugins: list plugins to use when calling the cmd hooks
@@ -81,24 +81,24 @@ class cached:
             )
 
         @functools.wraps(f)
-        async def wrapper(*args, **kwargs):
-            return await self.decorator(f, *args, **kwargs)
+        def wrapper(*args, **kwargs):
+            return self.decorator(f, *args, **kwargs)
 
         wrapper.cache = self.cache
         return wrapper
 
-    async def decorator(self, f, *args, cache_read=True, cache_write=True, **kwargs):
+    def decorator(self, f, *args, cache_read=True, cache_write=True, **kwargs):
         key = self.get_cache_key(f, args, kwargs)
 
         if cache_read:
-            value = await self.get_from_cache(key)
+            value = self.get_from_cache(key)
             if value is not None:
                 return value
 
-        result = await f(*args, **kwargs)
+        result = f(*args, **kwargs)
 
         if cache_write:
-            await self.set_in_cache(key, result)
+            self.set_in_cache(key, result)
 
         return result
 
@@ -119,16 +119,16 @@ class cached:
             + str(ordered_kwargs)
         )
 
-    async def get_from_cache(self, key):
+    def get_from_cache(self, key):
         try:
-            value = await self.cache.get(key)
+            value = self.cache.get(key)
             return value
         except Exception:
             logger.exception("Couldn't retrieve %s, unexpected error", key)
 
-    async def set_in_cache(self, key, value):
+    def set_in_cache(self, key, value):
         try:
-            await self.cache.set(key, value, ttl=self.ttl)
+            self.cache.set(key, value, self.ttl)
         except Exception:
             logger.exception("Couldn't set %s in key %s, unexpected error", value, key)
 
@@ -139,7 +139,7 @@ class cached_stampede(cached):
     while avoids for cache stampede effects.
 
     In some cases you will need to send more args to configure the cache object.
-    An example would be endpoint and port for the RedisCache. You can send those args as
+    An example would be endpoint and port for the SimpleMemoryCache. You can send those args as
     kwargs and they will be propagated accordingly.
 
     Only one cache instance is created per decorated function. If you expect high concurrency
@@ -154,7 +154,7 @@ class cached_stampede(cached):
         + function_name + args + kwargs
     :param key_from_attr: str arg or kwarg name from the function to use as a key.
     :param cache: cache class to use when calling the ``set``/``get`` operations.
-        Default is ``aiocache.SimpleMemoryCache``.
+        Default is ``pycached.SimpleMemoryCache``.
     :param serializer: serializer instance to use when calling the ``dumps``/``loads``.
         Default is JsonSerializer.
     :param plugins: list plugins to use when calling the cmd hooks
@@ -170,21 +170,21 @@ class cached_stampede(cached):
         super().__init__(**kwargs)
         self.lease = lease
 
-    async def decorator(self, f, *args, **kwargs):
+    def decorator(self, f, *args, **kwargs):
         key = self.get_cache_key(f, args, kwargs)
 
-        value = await self.get_from_cache(key)
+        value = self.get_from_cache(key)
         if value is not None:
             return value
 
-        async with RedLock(self.cache, key, self.lease):
-            value = await self.get_from_cache(key)
+        with RedLock(self.cache, key, self.lease):
+            value = self.get_from_cache(key)
             if value is not None:
                 return value
 
-            result = await f(*args, **kwargs)
+            result = f(*args, **kwargs)
 
-            await self.set_in_cache(key, result)
+            self.set_in_cache(key, result)
 
         return result
 
@@ -227,7 +227,7 @@ class multi_cached:
         Receives the key the function and same args and kwargs as the called function.
     :param ttl: int seconds to store the keys. Default is 0 which means no expiration.
     :param cache: cache class to use when calling the ``multi_set``/``multi_get`` operations.
-        Default is ``aiocache.SimpleMemoryCache``.
+        Default is ``pycached.SimpleMemoryCache``.
     :param serializer: serializer instance to use when calling the ``dumps``/``loads``.
         If its None, default one from the cache backend is used.
     :param plugins: plugins to use when calling the cmd hooks
@@ -271,19 +271,19 @@ class multi_cached:
             )
 
         @functools.wraps(f)
-        async def wrapper(*args, **kwargs):
-            return await self.decorator(f, *args, **kwargs)
+        def wrapper(*args, **kwargs):
+            return self.decorator(f, *args, **kwargs)
 
         wrapper.cache = self.cache
         return wrapper
 
-    async def decorator(self, f, *args, cache_read=True, cache_write=True, **kwargs):
+    def decorator(self, f, *args, cache_read=True, cache_write=True, **kwargs):
         missing_keys = []
         partial = {}
         keys, new_args, args_index = self.get_cache_keys(f, args, kwargs)
 
         if cache_read:
-            values = await self.get_from_cache(*keys)
+            values = self.get_from_cache(*keys)
             for key, value in zip(keys, values):
                 if value is None:
                     missing_keys.append(key)
@@ -299,11 +299,11 @@ class multi_cached:
         else:
             kwargs[self.keys_from_attr] = missing_keys
 
-        result = await f(*new_args, **kwargs)
+        result = f(*new_args, **kwargs)
         result.update(partial)
 
         if cache_write:
-            await self.set_in_cache(result, f, args, kwargs)
+            self.set_in_cache(result, f, args, kwargs)
 
         return result
 
@@ -321,19 +321,19 @@ class multi_cached:
 
         return keys, new_args, keys_index
 
-    async def get_from_cache(self, *keys):
+    def get_from_cache(self, *keys):
         if not keys:
             return []
         try:
-            values = await self.cache.multi_get(keys)
+            values = self.cache.multi_get(keys)
             return values
         except Exception:
             logger.exception("Couldn't retrieve %s, unexpected error", keys)
             return [None] * len(keys)
 
-    async def set_in_cache(self, result, fn, fn_args, fn_kwargs):
+    def set_in_cache(self, result, fn, fn_args, fn_kwargs):
         try:
-            await self.cache.multi_set(
+            self.cache.multi_set(
                 [(self.key_builder(k, fn, *fn_args, **fn_kwargs), v) for k, v in result.items()],
                 ttl=self.ttl,
             )

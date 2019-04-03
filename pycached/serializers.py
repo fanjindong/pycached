@@ -36,7 +36,7 @@ class BaseSerializer:
 class NullSerializer(BaseSerializer):
     """
     This serializer does nothing. Its only recommended to be used by
-    :class:`aiocache.SimpleMemoryCache` because for other backends it will
+    :class:`pycached.SimpleMemoryCache` because for other backends it will
     produce incompatible data unless you work only with str types.
 
     DISCLAIMER: Be careful with mutable types and memory storage. The following
@@ -44,9 +44,9 @@ class NullSerializer(BaseSerializer):
 
         cache = SimpleMemoryCache()
         my_list = [1]
-        await cache.set("key", my_list)
+        cache.set("key", my_list)
         my_list.append(2)
-        await cache.get("key")  # Will return [1, 2]
+        cache.get("key")  # Will return [1, 2]
     """
 
     def dumps(self, value):

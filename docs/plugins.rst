@@ -5,8 +5,8 @@ Plugins
 
 Plugins can be used to enrich the behavior of the cache. By default all caches are configured without any plugin but can add new ones in the constructor or after initializing the cache class::
 
-    >>> from aiocache import SimpleMemoryCache
-    >>> from aiocache.plugins import TimingPlugin
+    >>> from pycached import SimpleMemoryCache
+    >>> from pycached.plugins import TimingPlugin
     cache = SimpleMemoryCache(plugins=[HitMissRatioPlugin()])
     cache.plugins += [TimingPlugin()]
 
@@ -27,7 +27,7 @@ A complete example of using plugins:
 BasePlugin
 ----------
 
-.. autoclass:: aiocache.plugins.BasePlugin
+.. autoclass:: pycached.plugins.BasePlugin
   :members:
   :undoc-members:
 
@@ -36,7 +36,7 @@ BasePlugin
 TimingPlugin
 ------------
 
-.. autoclass:: aiocache.plugins.TimingPlugin
+.. autoclass:: pycached.plugins.TimingPlugin
   :members:
   :undoc-members:
 
@@ -45,6 +45,6 @@ TimingPlugin
 HitMissRatioPlugin
 ------------------
 
-.. autoclass:: aiocache.plugins.HitMissRatioPlugin
+.. autoclass:: pycached.plugins.HitMissRatioPlugin
   :members:
   :undoc-members:

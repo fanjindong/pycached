@@ -3,16 +3,16 @@ cov-report = true
 
 lint:
 	pipenv run flake8
-	pipenv run black -l 100 --check tests/ aiocache/
+	pipenv run black -l 100 --check tests/ pycached/
 
 format:
-	pipenv run black -l 100 tests/ aiocache/
+	pipenv run black -l 100 tests/ pycached/
 
 install-dev:
 	pipenv install --skip-lock -d
 
 pylint:
-	pipenv run pylint --disable=C0111 aiocache
+	pipenv run pylint --disable=C0111 pycached
 
 unit:
 	pipenv run coverage run -m pytest tests/ut

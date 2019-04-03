@@ -1,11 +1,10 @@
-import os
-import time
 import functools
 import logging
-import asyncio
+import os
+import time
 
-from aiocache import serializers
-
+import timeout_decorator
+from pycached import serializers
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +12,6 @@ SENTINEL = object()
 
 
 class API:
-
     CMDS = set()
 
     @classmethod
@@ -31,23 +29,23 @@ class API:
         This decorator sets a maximum timeout for a coroutine to execute. The timeout can be both
         set in the ``self.timeout`` attribute or in the ``timeout`` kwarg of the function call.
         I.e if you have a function ``get(self, key)``, if its decorated with this decorator, you
-        will be able to call it with ``await get(self, "my_key", timeout=4)``.
+        will be able to call it with ``get(self, "my_key", timeout=4)``.
 
         Use 0 or None to disable the timeout.
         """
         NOT_SET = "NOT_SET"
 
         @functools.wraps(func)
-        async def _timeout(self, *args, timeout=NOT_SET, **kwargs):
+        def _timeout(self, *args, timeout=NOT_SET, **kwargs):
             timeout = self.timeout if timeout == NOT_SET else timeout
             if timeout == 0 or timeout is None:
-                return await func(self, *args, **kwargs)
-            return await asyncio.wait_for(func(self, *args, **kwargs), timeout)
+                return func(self, *args, **kwargs)
+            return timeout_decorator.timeout(timeout)(func)(self, *args, **kwargs)
 
         return _timeout
 
     @classmethod
-    def aiocache_enabled(cls, fake_return=None):
+    def pycached_enabled(cls, fake_return=None):
         """
         Use this decorator to be able to fake the return of the function by setting the
         ``AIOCACHE_DISABLE`` environment variable
@@ -55,10 +53,10 @@ class API:
 
         def enabled(func):
             @functools.wraps(func)
-            async def _enabled(*args, **kwargs):
+            def _enabled(*args, **kwargs):
                 if os.getenv("AIOCACHE_DISABLE") == "1":
                     return fake_return
-                return await func(*args, **kwargs)
+                return func(*args, **kwargs)
 
             return _enabled
 
@@ -67,16 +65,16 @@ class API:
     @classmethod
     def plugins(cls, func):
         @functools.wraps(func)
-        async def _plugins(self, *args, **kwargs):
+        def _plugins(self, *args, **kwargs):
             start = time.monotonic()
             for plugin in self.plugins:
-                await getattr(plugin, "pre_{}".format(func.__name__))(self, *args, **kwargs)
+                getattr(plugin, "pre_{}".format(func.__name__))(self, *args, **kwargs)
 
-            ret = await func(self, *args, **kwargs)
+            ret = func(self, *args, **kwargs)
 
             end = time.monotonic()
             for plugin in self.plugins:
-                await getattr(plugin, "post_{}".format(func.__name__))(
+                getattr(plugin, "post_{}".format(func.__name__))(
                     self, *args, took=end - start, ret=ret, **kwargs
                 )
             return ret
@@ -89,9 +87,9 @@ class BaseCache:
     Base class that agregates the common logic for the different caches that may exist. Cache
     related available options are:
 
-    :param serializer: obj derived from :class:`aiocache.serializers.BaseSerializer`. Default is
-        :class:`aiocache.serializers.StringSerializer`.
-    :param plugins: list of :class:`aiocache.plugins.BasePlugin` derived classes. Default is empty
+    :param serializer: obj derived from :class:`pycached.serializers.BaseSerializer`. Default is
+        :class:`pycached.serializers.StringSerializer`.
+    :param plugins: list of :class:`pycached.plugins.BasePlugin` derived classes. Default is empty
         list.
     :param namespace: string to use as default prefix for the key used in all operations of
         the backend. Default is None
@@ -104,7 +102,7 @@ class BaseCache:
     """
 
     def __init__(
-        self, serializer=None, plugins=None, namespace=None, key_builder=None, timeout=5, ttl=None
+            self, serializer=None, plugins=None, namespace=None, key_builder=None, timeout=5, ttl=None
     ):
         self.timeout = timeout
         self.namespace = namespace
@@ -134,10 +132,10 @@ class BaseCache:
         self._plugins = value
 
     @API.register
-    @API.aiocache_enabled(fake_return=True)
+    @API.pycached_enabled(fake_return=True)
     @API.timeout
     @API.plugins
-    async def add(self, key, value, ttl=SENTINEL, dumps_fn=None, namespace=None, _conn=None):
+    def add(self, key, value, ttl=SENTINEL, dumps_fn=None, namespace=None, _conn=None):
         """
         Stores the value in the given key with ttl if specified. Raises an error if the
         key already exists.
@@ -160,19 +158,19 @@ class BaseCache:
         dumps = dumps_fn or self._serializer.dumps
         ns_key = self.build_key(key, namespace=namespace)
 
-        await self._add(ns_key, dumps(value), ttl=self._get_ttl(ttl), _conn=_conn)
+        self._add(ns_key, dumps(value), ttl=self._get_ttl(ttl), _conn=_conn)
 
         logger.debug("ADD %s %s (%.4f)s", ns_key, True, time.monotonic() - start)
         return True
 
-    async def _add(self, key, value, ttl, _conn=None):
+    def _add(self, key, value, ttl, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled()
+    @API.pycached_enabled()
     @API.timeout
     @API.plugins
-    async def get(self, key, default=None, loads_fn=None, namespace=None, _conn=None):
+    def get(self, key, default=None, loads_fn=None, namespace=None, _conn=None):
         """
         Get a value from the cache. Returns default if not found.
 
@@ -189,19 +187,19 @@ class BaseCache:
         loads = loads_fn or self._serializer.loads
         ns_key = self.build_key(key, namespace=namespace)
 
-        value = loads(await self._get(ns_key, encoding=self.serializer.encoding, _conn=_conn))
+        value = loads(self._get(ns_key, _conn=_conn))
 
         logger.debug("GET %s %s (%.4f)s", ns_key, value is not None, time.monotonic() - start)
         return value if value is not None else default
 
-    async def _get(self, key, encoding, _conn=None):
+    def _get(self, key, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=[])
+    @API.pycached_enabled(fake_return=[])
     @API.timeout
     @API.plugins
-    async def multi_get(self, keys, loads_fn=None, namespace=None, _conn=None):
+    def multi_get(self, keys, loads_fn=None, namespace=None, _conn=None):
         """
         Get multiple values from the cache, values not found are Nones.
 
@@ -219,8 +217,8 @@ class BaseCache:
         ns_keys = [self.build_key(key, namespace=namespace) for key in keys]
         values = [
             loads(value)
-            for value in await self._multi_get(
-                ns_keys, encoding=self.serializer.encoding, _conn=_conn
+            for value in self._multi_get(
+                ns_keys, _conn=_conn
             )
         ]
 
@@ -232,15 +230,15 @@ class BaseCache:
         )
         return values
 
-    async def _multi_get(self, keys, encoding, _conn=None):
+    def _multi_get(self, keys, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=True)
+    @API.pycached_enabled(fake_return=True)
     @API.timeout
     @API.plugins
-    async def set(
-        self, key, value, ttl=SENTINEL, dumps_fn=None, namespace=None, _cas_token=None, _conn=None
+    def set(
+            self, key, value, ttl=SENTINEL, dumps_fn=None, namespace=None, _cas_token=None, _conn=None
     ):
         """
         Stores the value in the given key with ttl if specified
@@ -261,21 +259,21 @@ class BaseCache:
         dumps = dumps_fn or self._serializer.dumps
         ns_key = self.build_key(key, namespace=namespace)
 
-        res = await self._set(
+        res = self._set(
             ns_key, dumps(value), ttl=self._get_ttl(ttl), _cas_token=_cas_token, _conn=_conn
         )
 
         logger.debug("SET %s %d (%.4f)s", ns_key, True, time.monotonic() - start)
         return res
 
-    async def _set(self, key, value, ttl, _cas_token=None, _conn=None):
+    def _set(self, key, value, ttl, _cas_token=None, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=True)
+    @API.pycached_enabled(fake_return=True)
     @API.timeout
     @API.plugins
-    async def multi_set(self, pairs, ttl=SENTINEL, dumps_fn=None, namespace=None, _conn=None):
+    def multi_set(self, pairs, ttl=SENTINEL, dumps_fn=None, namespace=None, _conn=None):
         """
         Stores multiple values in the given keys.
 
@@ -297,7 +295,7 @@ class BaseCache:
         for key, value in pairs:
             tmp_pairs.append((self.build_key(key, namespace=namespace), dumps(value)))
 
-        await self._multi_set(tmp_pairs, ttl=self._get_ttl(ttl), _conn=_conn)
+        self._multi_set(tmp_pairs, ttl=self._get_ttl(ttl), _conn=_conn)
 
         logger.debug(
             "MULTI_SET %s %d (%.4f)s",
@@ -307,14 +305,14 @@ class BaseCache:
         )
         return True
 
-    async def _multi_set(self, pairs, ttl, _conn=None):
+    def _multi_set(self, pairs, ttl, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=0)
+    @API.pycached_enabled(fake_return=0)
     @API.timeout
     @API.plugins
-    async def delete(self, key, namespace=None, _conn=None):
+    def delete(self, key, namespace=None, _conn=None):
         """
         Deletes the given key.
 
@@ -327,18 +325,18 @@ class BaseCache:
         """
         start = time.monotonic()
         ns_key = self.build_key(key, namespace=namespace)
-        ret = await self._delete(ns_key, _conn=_conn)
+        ret = self._delete(ns_key, _conn=_conn)
         logger.debug("DELETE %s %d (%.4f)s", ns_key, ret, time.monotonic() - start)
         return ret
 
-    async def _delete(self, key, _conn=None):
+    def _delete(self, key, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=False)
+    @API.pycached_enabled(fake_return=False)
     @API.timeout
     @API.plugins
-    async def exists(self, key, namespace=None, _conn=None):
+    def exists(self, key, namespace=None, _conn=None):
         """
         Check key exists in the cache.
 
@@ -351,18 +349,18 @@ class BaseCache:
         """
         start = time.monotonic()
         ns_key = self.build_key(key, namespace=namespace)
-        ret = await self._exists(ns_key, _conn=_conn)
+        ret = self._exists(ns_key, _conn=_conn)
         logger.debug("EXISTS %s %d (%.4f)s", ns_key, ret, time.monotonic() - start)
         return ret
 
-    async def _exists(self, key, _conn=None):
+    def _exists(self, key, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=1)
+    @API.pycached_enabled(fake_return=1)
     @API.timeout
     @API.plugins
-    async def increment(self, key, delta=1, namespace=None, _conn=None):
+    def increment(self, key, delta=1, namespace=None, _conn=None):
         """
         Increments value stored in key by delta (can be negative). If key doesn't
         exist, it creates the key with delta as value.
@@ -378,18 +376,18 @@ class BaseCache:
         """
         start = time.monotonic()
         ns_key = self.build_key(key, namespace=namespace)
-        ret = await self._increment(ns_key, delta, _conn=_conn)
+        ret = self._increment(ns_key, delta, _conn=_conn)
         logger.debug("INCREMENT %s %d (%.4f)s", ns_key, ret, time.monotonic() - start)
         return ret
 
-    async def _increment(self, key, delta, _conn=None):
+    def _increment(self, key, delta, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=False)
+    @API.pycached_enabled(fake_return=False)
     @API.timeout
     @API.plugins
-    async def expire(self, key, ttl, namespace=None, _conn=None):
+    def expire(self, key, ttl, namespace=None, _conn=None):
         """
         Set the ttl to the given key. By setting it to 0, it will disable it
 
@@ -403,18 +401,18 @@ class BaseCache:
         """
         start = time.monotonic()
         ns_key = self.build_key(key, namespace=namespace)
-        ret = await self._expire(ns_key, ttl, _conn=_conn)
+        ret = self._expire(ns_key, ttl, _conn=_conn)
         logger.debug("EXPIRE %s %d (%.4f)s", ns_key, ret, time.monotonic() - start)
         return ret
 
-    async def _expire(self, key, ttl, _conn=None):
+    def _expire(self, key, ttl, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled(fake_return=True)
+    @API.pycached_enabled(fake_return=True)
     @API.timeout
     @API.plugins
-    async def clear(self, namespace=None, _conn=None):
+    def clear(self, namespace=None, _conn=None):
         """
         Clears the cache in the cache namespace. If an alternative namespace is given, it will
         clear those ones instead.
@@ -426,18 +424,18 @@ class BaseCache:
         :raises: :class:`asyncio.TimeoutError` if it lasts more than self.timeout
         """
         start = time.monotonic()
-        ret = await self._clear(namespace, _conn=_conn)
+        ret = self._clear(namespace, _conn=_conn)
         logger.debug("CLEAR %s %d (%.4f)s", namespace, ret, time.monotonic() - start)
         return ret
 
-    async def _clear(self, namespace, _conn=None):
+    def _clear(self, namespace, _conn=None):
         raise NotImplementedError()
 
     @API.register
-    @API.aiocache_enabled()
+    @API.pycached_enabled()
     @API.timeout
     @API.plugins
-    async def raw(self, command, *args, _conn=None, **kwargs):
+    def raw(self, command, *args, _conn=None, **kwargs):
         """
         Send the raw command to the underlying client. Note that by using this CMD you
         will lose compatibility with other backends.
@@ -452,17 +450,17 @@ class BaseCache:
         :raises: :class:`asyncio.TimeoutError` if it lasts more than self.timeout
         """
         start = time.monotonic()
-        ret = await self._raw(
-            command, *args, encoding=self.serializer.encoding, _conn=_conn, **kwargs
+        ret = self._raw(
+            command, *args, _conn=_conn, **kwargs
         )
         logger.debug("%s (%.4f)s", command, time.monotonic() - start)
         return ret
 
-    async def _raw(self, command, *args, **kwargs):
+    def _raw(self, command, *args, **kwargs):
         raise NotImplementedError()
 
     @API.timeout
-    async def close(self, *args, _conn=None, **kwargs):
+    def close(self, *args, _conn=None, **kwargs):
         """
         Perform any resource clean up necessary to exit the program safely.
         After closing, cmd execution is still possible but you will have to
@@ -471,11 +469,11 @@ class BaseCache:
         :raises: :class:`asyncio.TimeoutError` if it lasts more than self.timeout
         """
         start = time.monotonic()
-        ret = await self._close(*args, _conn=_conn, **kwargs)
+        ret = self._close(*args, _conn=_conn, **kwargs)
         logger.debug("CLOSE (%.4f)s", time.monotonic() - start)
         return ret
 
-    async def _close(self, *args, **kwargs):
+    def _close(self, *args, **kwargs):
         pass
 
     def _build_key(self, key, namespace=None):
@@ -491,10 +489,10 @@ class BaseCache:
     def get_connection(self):
         return _Conn(self)
 
-    async def acquire_conn(self):
+    def acquire_conn(self):
         return self
 
-    async def release_conn(self, conn):
+    def release_conn(self, conn):
         pass
 
 
@@ -503,20 +501,20 @@ class _Conn:
         self._cache = cache
         self._conn = None
 
-    async def __aenter__(self):
-        self._conn = await self._cache.acquire_conn()
+    def __aenter__(self):
+        self._conn = self._cache.acquire_conn()
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        await self._cache.release_conn(self._conn)
+    def __aexit__(self, exc_type, exc_value, traceback):
+        self._cache.release_conn(self._conn)
 
     def __getattr__(self, name):
         return self._cache.__getattribute__(name)
 
     @classmethod
     def _inject_conn(cls, cmd_name):
-        async def _do_inject_conn(self, *args, **kwargs):
-            return await getattr(self._cache, cmd_name)(*args, _conn=self._conn, **kwargs)
+        def _do_inject_conn(self, *args, **kwargs):
+            return getattr(self._cache, cmd_name)(*args, _conn=self._conn, **kwargs)
 
         return _do_inject_conn
 

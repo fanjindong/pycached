@@ -4,8 +4,8 @@ import asyncio
 
 from marshmallow import fields, Schema, post_load
 
-from aiocache import SimpleMemoryCache
-from aiocache.serializers import BaseSerializer
+from pycached import SimpleMemoryCache
+from pycached.serializers import BaseSerializer
 
 
 class RandomModel:
@@ -50,11 +50,11 @@ class MarshmallowSerializer(Schema, BaseSerializer):
 cache = SimpleMemoryCache(serializer=MarshmallowSerializer(), namespace="main")
 
 
-async def serializer():
+def serializer():
     model = RandomModel()
-    await cache.set("key", model)
+    cache.set("key", model)
 
-    result = await cache.get("key")
+    result = cache.get("key")
 
     assert result.int_type == model.int_type
     assert result.str_type == model.str_type

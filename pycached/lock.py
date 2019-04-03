@@ -3,13 +3,13 @@ import uuid
 
 from typing import Type, Union, Any
 
-from aiocache.base import BaseCache
+from pycached.base import BaseCache
 
 
 class RedLock:
     """
     Implementation of `Redlock <https://redis.io/topics/distlock>`_
-    with a single instance because aiocache is focused on single
+    with a single instance because pycached is focused on single
     instance cache.
 
     This locking has some limitations and shouldn't be used in
@@ -39,21 +39,21 @@ class RedLock:
           race conditions.
         - Memory implementation is not distributed, it will only apply
           to the process running. Say you have 4 processes running
-          APIs with aiocache, the locking will apply only per process
+          APIs with pycached, the locking will apply only per process
           (still useful to reduce load per process).
 
     Example usage::
 
-        from aiocache import RedisCache
-        from aiocache.lock import RedLock
+        from pycached import RedisCache
+        from pycached.lock import RedLock
 
         cache = RedisCache()
         async with RedLock(cache, 'key', lease=1):  # Calls will wait here
-            result = await cache.get('key')
+            result = cache.get('key')
             if result is not None:
                 return result
-            result = await super_expensive_function()
-            await cache.set('key', result)
+            result = super_expensive_function()
+            cache.set('key', result)
 
     In the example, first call will start computing the ``super_expensive_function``
     while consecutive calls will block at most 1 second. If the blocking lasts for
@@ -69,30 +69,30 @@ class RedLock:
         self.lease = lease
         self._value = ""
 
-    async def __aenter__(self):
-        return await self._acquire()
+    def __aenter__(self):
+        return self._acquire()
 
-    async def _acquire(self):
+    def _acquire(self):
         self._value = str(uuid.uuid4())
         try:
-            await self.client._add(self.key, self._value, ttl=self.lease)
+            self.client._add(self.key, self._value, ttl=self.lease)
             RedLock._EVENTS[self.key] = asyncio.Event()
         except ValueError:
-            await self._wait_for_release()
+            self._wait_for_release()
 
-    async def _wait_for_release(self):
+    def _wait_for_release(self):
         try:
-            await asyncio.wait_for(RedLock._EVENTS[self.key].wait(), self.lease)
+            asyncio.wait_for(RedLock._EVENTS[self.key].wait(), self.lease)
         except asyncio.TimeoutError:
             pass
         except KeyError:  # lock was released when wait_for was rescheduled
             pass
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        await self._release()
+    def __aexit__(self, exc_type, exc_value, traceback):
+        self._release()
 
-    async def _release(self):
-        removed = await self.client._redlock_release(self.key, self._value)
+    def _release(self):
+        removed = self.client._redlock_release(self.key, self._value)
         if removed:
             RedLock._EVENTS.pop(self.key).set()
 
@@ -106,7 +106,7 @@ class OptimisticLock:
     and they will only fail if before finish, conflicting modifications with other
     transactions are found, producing a roll back.
 
-    Finding a conflict will end up raising an `aiocache.lock.OptimisticLockError`
+    Finding a conflict will end up raising an `pycached.lock.OptimisticLockError`
     exception. A conflict happens when the value at the storage is different from
     the one we retrieved when the lock started.
 
@@ -116,20 +116,20 @@ class OptimisticLock:
 
         # The value stored in 'key' will be checked here
         async with OptimisticLock(cache, 'key') as lock:
-            result = await super_expensive_call()
-            await lock.cas(result)
+            result = super_expensive_call()
+            lock.cas(result)
 
     If any other call sets the value of ``key`` before the ``lock.cas`` is called,
-    an :class:`aiocache.lock.OptimisticLockError` will be raised. A way to make
+    an :class:`pycached.lock.OptimisticLockError` will be raised. A way to make
     the same call crash would be to change the value inside the lock like::
 
         cache = RedisCache()
 
         # The value stored in 'key' will be checked here
         async with OptimisticLock(cache, 'key') as lock:
-            result = await super_expensive_call()
-            await cache.set('random_value')  # This will make the `lock.cas` call fail
-            await lock.cas(result)
+            result = super_expensive_call()
+            cache.set('random_value')  # This will make the `lock.cas` call fail
+            lock.cas(result)
 
     If the lock is created with an unexisting key, there will never be conflicts.
     """
@@ -140,25 +140,25 @@ class OptimisticLock:
         self.ns_key = self.client._build_key(key)
         self._token = None
 
-    async def __aenter__(self):
-        return await self._acquire()
+    def __aenter__(self):
+        return self._acquire()
 
-    async def _acquire(self):
-        self._token = await self.client._gets(self.ns_key)
+    def _acquire(self):
+        self._token = self.client._gets(self.ns_key)
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
+    def __aexit__(self, exc_type, exc_value, traceback):
         pass
 
-    async def cas(self, value: Any, **kwargs) -> True:
+    def cas(self, value: Any, **kwargs) -> True:
         """
         Checks and sets the specified value for the locked key. If the value has changed
-        since the lock was created, it will raise an :class:`aiocache.lock.OptimisticLockError`
+        since the lock was created, it will raise an :class:`pycached.lock.OptimisticLockError`
         exception.
 
-        :raises: :class:`aiocache.lock.OptimisticLockError`
+        :raises: :class:`pycached.lock.OptimisticLockError`
         """
-        success = await self.client.set(self.key, value, _cas_token=self._token, **kwargs)
+        success = self.client.set(self.key, value, _cas_token=self._token, **kwargs)
         if not success:
             raise OptimisticLockError("Value has changed since the lock started")
         return True

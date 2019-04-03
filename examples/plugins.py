@@ -2,8 +2,8 @@ import asyncio
 import random
 import logging
 
-from aiocache import SimpleMemoryCache
-from aiocache.plugins import HitMissRatioPlugin, TimingPlugin, BasePlugin
+from pycached import SimpleMemoryCache
+from pycached.plugins import HitMissRatioPlugin, TimingPlugin, BasePlugin
 
 
 logger = logging.getLogger(__name__)
@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 class MyCustomPlugin(BasePlugin):
 
-    async def pre_set(self, *args, **kwargs):
+    def pre_set(self, *args, **kwargs):
         logger.info("I'm the pre_set hook being called with %s %s" % (args, kwargs))
 
-    async def post_set(self, *args, **kwargs):
+    def post_set(self, *args, **kwargs):
         logger.info("I'm the post_set hook being called with %s %s" % (args, kwargs))
 
 
@@ -23,16 +23,16 @@ cache = SimpleMemoryCache(
     namespace="main")
 
 
-async def run():
-    await cache.set("a", "1")
-    await cache.set("b", "2")
-    await cache.set("c", "3")
-    await cache.set("d", "4")
+def run():
+    cache.set("a", "1")
+    cache.set("b", "2")
+    cache.set("c", "3")
+    cache.set("d", "4")
 
     possible_keys = ["a", "b", "c", "d", "e", "f"]
 
     for t in range(1000):
-        await cache.get(random.choice(possible_keys))
+        cache.get(random.choice(possible_keys))
 
     assert cache.hit_miss_ratio["hit_ratio"] > 0.5
     assert cache.hit_miss_ratio["total"] == 1000

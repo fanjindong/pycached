@@ -1,19 +1,19 @@
-.. aiocache documentation master file, created by
+.. pycached documentation master file, created by
    sphinx-quickstart on Sat Oct  1 16:53:45 2016.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to aiocache's documentation!
+Welcome to pycached's documentation!
 ====================================
 
 
 Installing
 ----------
 
-- ``pip install aiocache``
-- ``pip install aiocache[redis]``
-- ``pip install aiocache[memcached]``
-- ``pip install aiocache[redis,memcached]``
+- ``pip install pycached``
+- ``pip install pycached[redis]``
+- ``pip install pycached[memcached]``
+- ``pip install pycached[redis,memcached]``
 
 
 Usage
@@ -25,7 +25,7 @@ Using a cache is as simple as
 
     >>> import asyncio
     >>> loop = asyncio.get_event_loop()
-    >>> from aiocache import SimpleMemoryCache
+    >>> from pycached import SimpleMemoryCache
     >>> cache = SimpleMemoryCache()
     >>> loop.run_until_complete(cache.set('key', 'value'))
     True
@@ -54,15 +54,15 @@ You can also setup cache aliases like in Django settings:
   :emphasize-lines: 6-26
 
 
-In `examples folder <https://github.com/argaen/aiocache/tree/master/examples>`_ you can check different use cases:
+In `examples folder <https://github.com/argaen/pycached/tree/master/examples>`_ you can check different use cases:
 
-- `Sanic, Aiohttp and Tornado <https://github.com/argaen/aiocache/tree/master/examples/frameworks>`_
-- `Python object in Redis <https://github.com/argaen/aiocache/blob/master/examples/python_object.py>`_
-- `Custom serializer for compressing data <https://github.com/argaen/aiocache/blob/master/examples/serializer_class.py>`_
-- `TimingPlugin and HitMissRatioPlugin demos <https://github.com/argaen/aiocache/blob/master/examples/plugins.py>`_
-- `Using marshmallow as a serializer <https://github.com/argaen/aiocache/blob/master/examples/marshmallow_serializer_class.py>`_
-- `Using cached decorator <https://github.com/argaen/aiocache/blob/master/examples/cached_decorator.py>`_.
-- `Using multi_cached decorator <https://github.com/argaen/aiocache/blob/master/examples/multicached_decorator.py>`_.
+- `Sanic, Aiohttp and Tornado <https://github.com/argaen/pycached/tree/master/examples/frameworks>`_
+- `Python object in Redis <https://github.com/argaen/pycached/blob/master/examples/python_object.py>`_
+- `Custom serializer for compressing data <https://github.com/argaen/pycached/blob/master/examples/serializer_class.py>`_
+- `TimingPlugin and HitMissRatioPlugin demos <https://github.com/argaen/pycached/blob/master/examples/plugins.py>`_
+- `Using marshmallow as a serializer <https://github.com/argaen/pycached/blob/master/examples/marshmallow_serializer_class.py>`_
+- `Using cached decorator <https://github.com/argaen/pycached/blob/master/examples/cached_decorator.py>`_.
+- `Using multi_cached decorator <https://github.com/argaen/pycached/blob/master/examples/multicached_decorator.py>`_.
 
 
 Contents

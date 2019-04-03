@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# aiocache documentation build configuration file, created by
+# pycached documentation build configuration file, created by
 # sphinx-quickstart on Sat Oct  1 16:53:45 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'aiocache'
+project = 'pycached'
 copyright = '2016, Manuel Miranda'
 author = 'Manuel Miranda'
 
@@ -67,7 +67,7 @@ author = 'Manuel Miranda'
 with open(
         os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
-            '../aiocache/_version.py')) as fp:
+            '../pycached/_version.py')) as fp:
     try:
         version = re.findall(
             r"^__version__ = \"([^']+)\"\r?$", fp.read())[0]
@@ -152,7 +152,7 @@ if not on_rtd:
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = 'aiocache v0.0.1'
+# html_title = 'pycached v0.0.1'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -252,7 +252,7 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'aiocachedoc'
+htmlhelp_basename = 'pycacheddoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -278,7 +278,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'aiocache.tex', 'aiocache Documentation',
+    (master_doc, 'pycached.tex', 'pycached Documentation',
      'Manuel Miranda', 'manual'),
 ]
 
@@ -320,7 +320,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'aiocache', 'aiocache Documentation',
+    (master_doc, 'pycached', 'pycached Documentation',
      [author], 1)
 ]
 
@@ -335,8 +335,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'aiocache', 'aiocache Documentation',
-     author, 'aiocache', 'One line description of project.',
+    (master_doc, 'pycached', 'pycached Documentation',
+     author, 'pycached', 'One line description of project.',
      'Miscellaneous'),
 ]
 
