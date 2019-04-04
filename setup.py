@@ -39,7 +39,6 @@ setup(
     extras_require={
         'redis:python_version<"3.7"': ['redis==2.10.6'],
         'redis:python_version>="3.7"': ['redis==2.10.6'],
-        'msgpack': ['msgpack'],
-        'timeout_decorator'
+        'msgpack': ['msgpack']
     }
 )
