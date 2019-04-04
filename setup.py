@@ -1,7 +1,11 @@
-import re
 import os
+import re
 
 from setuptools import setup, find_packages
+
+REQUIRED = [
+    'timeout_decorator'
+]
 
 with open(
         os.path.join(
@@ -13,10 +17,8 @@ with open(
     except IndexError:
         raise RuntimeError('Unable to determine version.')
 
-
 with open('README.rst', 'rt', encoding='utf8') as f:
     readme = f.read()
-
 
 setup(
     name='pycached',
@@ -33,7 +35,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(),
-    install_requires=None,
+    install_requires=REQUIRED,
     extras_require={
         'redis:python_version<"3.7"': ['redis==2.10.6'],
         'redis:python_version>="3.7"': ['redis==2.10.6'],
