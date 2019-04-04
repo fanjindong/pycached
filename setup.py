@@ -23,7 +23,7 @@ setup(
     version=version,
     author='Fan Jindong',
     url='https://github.com/fanjindong/pycached',
-    author_email='765912710@qq/com',
+    author_email='765912710@qq.com',
     description='multi backend cache',
     long_description=readme,
     classifiers=[
@@ -38,5 +38,6 @@ setup(
         'redis:python_version<"3.7"': ['redis==2.10.6'],
         'redis:python_version>="3.7"': ['redis==2.10.6'],
         'msgpack': ['msgpack'],
+        'timeout_decorator'
     }
 )
