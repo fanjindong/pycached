@@ -1,9 +1,7 @@
-import asyncio
-
 from collections import namedtuple
+
 from pycached import RedisCache
 from pycached.serializers import PickleSerializer
-
 
 MyObject = namedtuple("MyObject", ["x", "y"])
 cache = RedisCache(serializer=PickleSerializer(), namespace="main")
@@ -19,10 +17,9 @@ def complex_object():
 
 
 def test_python_object():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(complex_object())
-    loop.run_until_complete(cache.delete("key"))
-    loop.run_until_complete(cache.close())
+    complex_object()
+    cache.delete("key")
+    cache.close()
 
 
 if __name__ == "__main__":

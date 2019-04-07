@@ -1,4 +1,3 @@
-import asyncio
 
 from collections import namedtuple
 
@@ -16,11 +15,10 @@ def cached_call():
 
 def test_cached():
     cache = RedisCache(endpoint="127.0.0.1", port=6379, namespace="main")
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(cached_call())
-    assert loop.run_until_complete(cache.exists("key")) is True
-    loop.run_until_complete(cache.delete("key"))
-    loop.run_until_complete(cache.close())
+    cached_call()
+    assert cache.exists("key") is True
+    cache.delete("key")
+    cache.close()
 
 
 if __name__ == "__main__":

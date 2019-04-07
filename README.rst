@@ -1,13 +1,14 @@
 pycached
 ########
 
-Asyncio cache supporting multiple backends (memory, redis and memcached).
+cache supporting multiple backends (memory, redis).
+Synchronization library based on aiocache.
 
-.. image:: https://travis-ci.org/argaen/pycached.svg?branch=master
-  :target: https://travis-ci.org/argaen/pycached
+.. image:: https://travis-ci.org/fanjindong/pycached.svg?branch=master
+  :target: https://travis-ci.org/fanjindong/pycached
 
-.. image:: https://codecov.io/gh/argaen/pycached/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/argaen/pycached
+.. image:: https://codecov.io/gh/fanjindong/pycached/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/fanjindong/pycached
 
 .. image:: https://badge.fury.io/py/pycached.svg
   :target: https://pypi.python.org/pypi/pycached
@@ -16,7 +17,7 @@ Asyncio cache supporting multiple backends (memory, redis and memcached).
   :target: https://pypi.python.org/pypi/pycached
 
 .. image:: https://api.codacy.com/project/badge/Grade/96f772e38e63489ca884dbaf6e9fb7fd
-  :target: https://www.codacy.com/app/argaen/pycached
+  :target: https://www.codacy.com/app/fanjindong/pycached
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/ambv/black
@@ -48,8 +49,6 @@ Installing
 
 - ``pip install pycached``
 - ``pip install pycached[redis]``
-- ``pip install pycached[memcached]``
-- ``pip install pycached[redis,memcached]``
 - ``pip install pycached[msgpack]``
 
 
@@ -60,20 +59,18 @@ Using a cache is as simple as
 
 .. code-block:: python
 
-    >>> import asyncio
-    >>> loop = asyncio.get_event_loop()
     >>> from pycached import SimpleMemoryCache  # Here you can also use RedisCache and MemcachedCache
     >>> cache = SimpleMemoryCache()
-    >>> loop.run_until_complete(cache.set('key', 'value'))
+    >>> cache.set('key', 'value')
     True
-    >>> loop.run_until_complete(cache.get('key'))
+    >>> cache.get('key')
     'value'
 
 Or as a decorator
 
 .. code-block:: python
 
-    import asyncio
+    import time
 
     from collections import namedtuple
 
@@ -84,21 +81,19 @@ Or as a decorator
     Result = namedtuple('Result', "content, status")
 
 
-    @cached(
-        ttl=10, cache=RedisCache, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
+    @cached(ttl=10, cache=RedisCache, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
     def cached_call():
         print("Sleeping for three seconds zzzz.....")
-        asyncio.sleep(3)
+        time.sleep(3)
         return Result("content", 200)
 
 
     def run():
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(cached_call())
-        loop.run_until_complete(cached_call())
-        loop.run_until_complete(cached_call())
+        cached_call()
+        cached_call()
+        cached_call()
         cache = RedisCache(endpoint="127.0.0.1", port=6379, namespace="main")
-        loop.run_until_complete(cache.delete("key"))
+        cache.delete("key")
 
     if __name__ == "__main__":
         run()
@@ -150,11 +145,10 @@ You can also setup cache aliases so its easy to reuse configurations
 
 
   def test_alias():
-      loop = asyncio.get_event_loop()
-      loop.run_until_complete(default_cache())
-      loop.run_until_complete(alt_cache())
+      default_cache()
+      alt_cache()
 
-      loop.run_until_complete(caches.get('redis_alt').delete("key"))
+      caches.get('redis_alt').delete("key")
 
 
   if __name__ == "__main__":
@@ -164,9 +158,9 @@ You can also setup cache aliases so its easy to reuse configurations
 How does it work
 ================
 
-Aiocache provides 3 main entities:
+Pycached provides 3 main entities:
 
-- **backends**: Allow you specify which backend you want to use for your cache. Currently supporting: SimpleMemoryCache, RedisCache using aioredis_ and MemCache using aiomcache_.
+- **backends**: Allow you specify which backend you want to use for your cache. Currently supporting: SimpleMemoryCache, RedisCache using redis_.
 - **serializers**: Serialize and deserialize the data between your code and the backends. This allows you to save any Python object into your cache. Currently supporting: StringSerializer, PickleSerializer, JsonSerializer, and MsgPackSerializer. But you can also build custom ones.
 - **plugins**: Implement a hooks system that allows to execute extra behavior before and after of each command.
 
@@ -184,15 +178,15 @@ Those 3 entities combine during some of the cache operations to apply the desire
 Amazing examples
 ================
 
-In `examples folder <https://github.com/argaen/pycached/tree/master/examples>`_ you can check different use cases:
+In `examples folder <https://github.com/fanjindong/pycached/tree/master/examples>`_ you can check different use cases:
 
-- `Sanic, Aiohttp and Tornado <https://github.com/argaen/pycached/tree/master/examples/frameworks>`_
-- `Python object in Redis <https://github.com/argaen/pycached/blob/master/examples/python_object.py>`_
-- `Custom serializer for compressing data <https://github.com/argaen/pycached/blob/master/examples/serializer_class.py>`_
-- `TimingPlugin and HitMissRatioPlugin demos <https://github.com/argaen/pycached/blob/master/examples/plugins.py>`_
-- `Using marshmallow as a serializer <https://github.com/argaen/pycached/blob/master/examples/marshmallow_serializer_class.py>`_
-- `Using cached decorator <https://github.com/argaen/pycached/blob/master/examples/cached_decorator.py>`_.
-- `Using multi_cached decorator <https://github.com/argaen/pycached/blob/master/examples/multicached_decorator.py>`_.
+- `Sanic, Aiohttp and Tornado <https://github.com/fanjindong/pycached/tree/master/examples/frameworks>`_
+- `Python object in Redis <https://github.com/fanjindong/pycached/blob/master/examples/python_object.py>`_
+- `Custom serializer for compressing data <https://github.com/fanjindong/pycached/blob/master/examples/serializer_class.py>`_
+- `TimingPlugin and HitMissRatioPlugin demos <https://github.com/fanjindong/pycached/blob/master/examples/plugins.py>`_
+- `Using marshmallow as a serializer <https://github.com/fanjindong/pycached/blob/master/examples/marshmallow_serializer_class.py>`_
+- `Using cached decorator <https://github.com/fanjindong/pycached/blob/master/examples/cached_decorator.py>`_.
+- `Using multi_cached decorator <https://github.com/fanjindong/pycached/blob/master/examples/multicached_decorator.py>`_.
 
 
 
@@ -206,8 +200,7 @@ Documentation
 - `Configuration <http://pycached.readthedocs.io/en/latest/configuration.html>`_
 - `Decorators <http://pycached.readthedocs.io/en/latest/decorators.html>`_
 - `Testing <http://pycached.readthedocs.io/en/latest/testing.html>`_
-- `Examples <https://github.com/argaen/pycached/tree/master/examples>`_
+- `Examples <https://github.com/fanjindong/pycached/tree/master/examples>`_
 
 
-.. _aioredis: https://github.com/aio-libs/aioredis
-.. _aiomcache: https://github.com/aio-libs/aiomcache
+.. _redis: https://github.com/andymccurdy/redis-py

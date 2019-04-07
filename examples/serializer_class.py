@@ -1,4 +1,3 @@
-import asyncio
 import zlib
 
 from pycached import RedisCache
@@ -44,10 +43,9 @@ def serializer():
 
 
 def test_serializer():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(serializer())
-    loop.run_until_complete(cache.delete("key"))
-    loop.run_until_complete(cache.close())
+    serializer()
+    cache.delete("key")
+    cache.close()
 
 
 if __name__ == "__main__":

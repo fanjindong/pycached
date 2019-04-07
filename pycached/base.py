@@ -48,13 +48,13 @@ class API:
     def pycached_enabled(cls, fake_return=None):
         """
         Use this decorator to be able to fake the return of the function by setting the
-        ``AIOCACHE_DISABLE`` environment variable
+        ``CACHE_DISABLE`` environment variable
         """
 
         def enabled(func):
             @functools.wraps(func)
             def _enabled(*args, **kwargs):
-                if os.getenv("AIOCACHE_DISABLE") == "1":
+                if os.getenv("CACHE_DISABLE") == "1":
                     return fake_return
                 return func(*args, **kwargs)
 

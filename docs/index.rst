@@ -12,8 +12,6 @@ Installing
 
 - ``pip install pycached``
 - ``pip install pycached[redis]``
-- ``pip install pycached[memcached]``
-- ``pip install pycached[redis,memcached]``
 
 
 Usage
@@ -23,13 +21,11 @@ Using a cache is as simple as
 
 .. code-block:: python
 
-    >>> import asyncio
-    >>> loop = asyncio.get_event_loop()
     >>> from pycached import SimpleMemoryCache
     >>> cache = SimpleMemoryCache()
-    >>> loop.run_until_complete(cache.set('key', 'value'))
+    >>> cache.set('key', 'value')
     True
-    >>> loop.run_until_complete(cache.get('key'))
+    >>> cache.get('key')
     'value'
 
 Here we are using the :ref:`simplememorycache` but you can use any other listed in :ref:`caches`. All caches contain the same minimum interface which consists on the following functions:
@@ -54,15 +50,15 @@ You can also setup cache aliases like in Django settings:
   :emphasize-lines: 6-26
 
 
-In `examples folder <https://github.com/argaen/pycached/tree/master/examples>`_ you can check different use cases:
+In `examples folder <https://github.com/fanjindong/pycached/tree/master/examples>`_ you can check different use cases:
 
-- `Sanic, Aiohttp and Tornado <https://github.com/argaen/pycached/tree/master/examples/frameworks>`_
-- `Python object in Redis <https://github.com/argaen/pycached/blob/master/examples/python_object.py>`_
-- `Custom serializer for compressing data <https://github.com/argaen/pycached/blob/master/examples/serializer_class.py>`_
-- `TimingPlugin and HitMissRatioPlugin demos <https://github.com/argaen/pycached/blob/master/examples/plugins.py>`_
-- `Using marshmallow as a serializer <https://github.com/argaen/pycached/blob/master/examples/marshmallow_serializer_class.py>`_
-- `Using cached decorator <https://github.com/argaen/pycached/blob/master/examples/cached_decorator.py>`_.
-- `Using multi_cached decorator <https://github.com/argaen/pycached/blob/master/examples/multicached_decorator.py>`_.
+- `Sanic, Aiohttp and Tornado <https://github.com/fanjindong/pycached/tree/master/examples/frameworks>`_
+- `Python object in Redis <https://github.com/fanjindong/pycached/blob/master/examples/python_object.py>`_
+- `Custom serializer for compressing data <https://github.com/fanjindong/pycached/blob/master/examples/serializer_class.py>`_
+- `TimingPlugin and HitMissRatioPlugin demos <https://github.com/fanjindong/pycached/blob/master/examples/plugins.py>`_
+- `Using marshmallow as a serializer <https://github.com/fanjindong/pycached/blob/master/examples/marshmallow_serializer_class.py>`_
+- `Using cached decorator <https://github.com/fanjindong/pycached/blob/master/examples/cached_decorator.py>`_.
+- `Using multi_cached decorator <https://github.com/fanjindong/pycached/blob/master/examples/multicached_decorator.py>`_.
 
 
 Contents

@@ -1,7 +1,7 @@
-import asyncio
 import json
 
 from marshmallow import Schema, fields, post_load
+
 from pycached import RedisCache
 
 
@@ -43,10 +43,9 @@ def serializer_function():
 
 
 def test_serializer_function():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(serializer_function())
-    loop.run_until_complete(cache.delete("key"))
-    loop.run_until_complete(cache.close())
+    serializer_function()
+    cache.delete("key")
+    cache.close()
 
 
 if __name__ == "__main__":

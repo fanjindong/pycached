@@ -1,6 +1,5 @@
 import random
 import string
-import asyncio
 
 from marshmallow import fields, Schema, post_load
 
@@ -63,9 +62,8 @@ def serializer():
 
 
 def test_serializer():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(serializer())
-    loop.run_until_complete(cache.delete("key"))
+    serializer()
+    cache.delete("key")
 
 
 if __name__ == "__main__":

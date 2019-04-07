@@ -1,10 +1,8 @@
-import asyncio
-import random
 import logging
+import random
 
 from pycached import SimpleMemoryCache
 from pycached.plugins import HitMissRatioPlugin, TimingPlugin, BasePlugin
-
 
 logger = logging.getLogger(__name__)
 
@@ -47,13 +45,11 @@ def run():
 
 
 def test_run():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run())
-    loop.run_until_complete(cache.delete("a"))
-    loop.run_until_complete(cache.delete("b"))
-    loop.run_until_complete(cache.delete("c"))
-    loop.run_until_complete(cache.delete("d"))
-
+    run()
+    cache.delete("a")
+    cache.delete("b")
+    cache.delete("c")
+    cache.delete("d")
 
 if __name__ == "__main__":
     test_run()

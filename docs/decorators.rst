@@ -3,7 +3,7 @@
 Decorators
 ==========
 
-pycached comes with a couple of decorators for caching results from asynchronous functions. Do not use the decorator in synchronous functions, it may lead to unexpected behavior.
+pycached comes with a couple of decorators for caching results from functions. Do not use the decorator in asynchronous functions, it may lead to unexpected behavior.
 
 ..  _cached:
 

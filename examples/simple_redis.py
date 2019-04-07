@@ -1,7 +1,4 @@
-import asyncio
-
 from pycached import RedisCache
-
 
 cache = RedisCache(endpoint="127.0.0.1", port=6379, namespace="main")
 
@@ -16,11 +13,10 @@ def redis():
 
 
 def test_redis():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(redis())
-    loop.run_until_complete(cache.delete("key"))
-    loop.run_until_complete(cache.delete("expire_me"))
-    loop.run_until_complete(cache.close())
+    redis()
+    cache.delete("key")
+    cache.delete("expire_me")
+    cache.close()
 
 
 if __name__ == "__main__":

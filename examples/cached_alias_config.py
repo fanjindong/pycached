@@ -1,5 +1,3 @@
-import asyncio
-
 from pycached import caches, SimpleMemoryCache, RedisCache
 from pycached.serializers import StringSerializer, PickleSerializer
 
@@ -27,7 +25,7 @@ caches.set_config({
 
 
 def default_cache():
-    cache = caches.get('default')   # This always returns the same instance
+    cache = caches.get('default')  # This always returns the same instance
     cache.set("key", "value")
 
     assert cache.get("key") == "value"
@@ -52,15 +50,14 @@ def alt_cache():
 
 
 def test_alias():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(default_cache())
-    loop.run_until_complete(alt_cache())
+    default_cache()
+    alt_cache()
 
     cache = RedisCache()
-    loop.run_until_complete(cache.delete("key"))
-    loop.run_until_complete(cache.close())
+    cache.delete("key")
+    cache.close()
 
-    loop.run_until_complete(caches.get('default').close())
+    caches.get('default').close()
 
 
 if __name__ == "__main__":
