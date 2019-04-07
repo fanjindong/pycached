@@ -4,6 +4,7 @@ import os
 import time
 
 import timeout_decorator
+
 from pycached import serializers
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class API:
             timeout = self.timeout if timeout == NOT_SET else timeout
             if timeout == 0 or timeout is None:
                 return func(self, *args, **kwargs)
-            return timeout_decorator.timeout(timeout)(func)(self, *args, **kwargs)
+            return timeout_decorator.timeout(seconds=timeout, use_signals=False)(func)(self, *args, **kwargs)
 
         return _timeout
 
