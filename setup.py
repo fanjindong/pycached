@@ -42,3 +42,6 @@ setup(
         'msgpack': ['msgpack']
     }
 )
+
+# python3.6 setup.py sdist
+# twine upload dist/pycached-0.0.4.tar.gz
