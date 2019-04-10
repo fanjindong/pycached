@@ -113,13 +113,13 @@ class SimpleMemoryBackend:
 class SimpleMemoryCache(SimpleMemoryBackend, BaseCache):
     """
     Memory cache implementation with the following components as defaults:
-        - serializer: :class:`aiocache.serializers.JsonSerializer`
+        - serializer: :class:`pycached.serializers.JsonSerializer`
         - plugins: None
 
     Config options are:
 
-    :param serializer: obj derived from :class:`aiocache.serializers.BaseSerializer`.
-    :param plugins: list of :class:`aiocache.plugins.BasePlugin` derived classes.
+    :param serializer: obj derived from :class:`pycached.serializers.BaseSerializer`.
+    :param plugins: list of :class:`pycached.plugins.BasePlugin` derived classes.
     :param namespace: string to use as default prefix for the key used in all operations of
         the backend. Default is None.
     :param timeout: int or float in seconds specifying maximum timeout for the operations to last.

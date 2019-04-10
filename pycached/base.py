@@ -38,7 +38,7 @@ class API:
 
         @functools.wraps(func)
         def _timeout(self, *args, timeout=NOT_SET, **kwargs):
-            timeout = self.timeout if timeout == NOT_SET else timeout
+            timeout:int = self.timeout if timeout == NOT_SET else timeout
             if timeout == 0 or timeout is None:
                 return func(self, *args, **kwargs)
             return timeout_decorator.timeout(seconds=timeout, use_signals=False)(func)(self, *args, **kwargs)
@@ -134,7 +134,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=True)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def add(self, key, value, ttl=SENTINEL, dumps_fn=None, namespace=None, _conn=None):
         """
@@ -169,7 +169,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled()
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def get(self, key, default=None, loads_fn=None, namespace=None, _conn=None):
         """
@@ -198,7 +198,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=[])
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def multi_get(self, keys, loads_fn=None, namespace=None, _conn=None):
         """
@@ -236,7 +236,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=True)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def set(
             self, key, value, ttl=SENTINEL, dumps_fn=None, namespace=None, _cas_token=None, _conn=None
@@ -272,7 +272,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=True)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def multi_set(self, pairs, ttl=SENTINEL, dumps_fn=None, namespace=None, _conn=None):
         """
@@ -311,7 +311,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=0)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def delete(self, key, namespace=None, _conn=None):
         """
@@ -335,7 +335,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=False)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def exists(self, key, namespace=None, _conn=None):
         """
@@ -359,7 +359,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=1)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def increment(self, key, delta=1, namespace=None, _conn=None):
         """
@@ -386,7 +386,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=False)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def expire(self, key, ttl, namespace=None, _conn=None):
         """
@@ -411,7 +411,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled(fake_return=True)
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def clear(self, namespace=None, _conn=None):
         """
@@ -434,7 +434,7 @@ class BaseCache:
 
     @API.register
     @API.pycached_enabled()
-    @API.timeout
+    # @API.timeout
     @API.plugins
     def raw(self, command, *args, _conn=None, **kwargs):
         """
@@ -460,7 +460,7 @@ class BaseCache:
     def _raw(self, command, *args, **kwargs):
         raise NotImplementedError()
 
-    @API.timeout
+    # @API.timeout
     def close(self, *args, _conn=None, **kwargs):
         """
         Perform any resource clean up necessary to exit the program safely.
