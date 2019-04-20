@@ -6,7 +6,7 @@ import redis
 from pycached.base import BaseCache
 from pycached.serializers import JsonSerializer
 
-AIOREDIS_BEFORE_ONE = redis.__version__.startswith("2.")
+REDIS_BEFORE_ONE = redis.__version__.startswith("2.")
 
 
 def conn(func):
@@ -73,7 +73,7 @@ class RedisBackend:
                 "decode_responses": True,
                 "max_connections": self.max_connections,
             }
-            if not AIOREDIS_BEFORE_ONE:
+            if not REDIS_BEFORE_ONE:
                 kwargs["create_connection_timeout"] = self.create_connection_timeout
 
             self._pool = redis.Redis(**kwargs)
@@ -107,7 +107,7 @@ class RedisBackend:
             return self._cas(key, value, _cas_token, ttl=ttl, _conn=_conn)
         if ttl is None:
             return _conn.set(key, value)
-        if AIOREDIS_BEFORE_ONE:
+        if REDIS_BEFORE_ONE:
             return _conn.setex(key, value, ttl)
         return _conn.setex(key, ttl, value)
 

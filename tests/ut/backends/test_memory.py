@@ -51,7 +51,7 @@ class TestSimpleMemoryBackend:
 
     
     def test_set_ttl_handle(self, memory):
-        memory._set(pytest.KEY, "value", ttl=100)
+        memory._set(pytest.KEY, "value", ttl=1)
         assert pytest.KEY in memory._handlers
         assert isinstance(memory._handlers[pytest.KEY], Timer)
 
