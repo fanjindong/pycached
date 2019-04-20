@@ -502,11 +502,11 @@ class _Conn:
         self._cache = cache
         self._conn = None
 
-    def __aenter__(self):
+    def __enter__(self):
         self._conn = self._cache.acquire_conn()
         return self
 
-    def __aexit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         self._cache.release_conn(self._conn)
 
     def __getattr__(self, name):

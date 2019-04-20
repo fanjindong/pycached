@@ -69,7 +69,7 @@ class RedLock:
         self.lease = lease
         self._value = ""
 
-    def __aenter__(self):
+    def __enter__(self):
         return self._acquire()
 
     def _acquire(self):
@@ -88,7 +88,7 @@ class RedLock:
         except KeyError:  # lock was released when wait_for was rescheduled
             pass
 
-    def __aexit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         self._release()
 
     def _release(self):
@@ -140,14 +140,14 @@ class OptimisticLock:
         self.ns_key = self.client._build_key(key)
         self._token = None
 
-    def __aenter__(self):
+    def __enter__(self):
         return self._acquire()
 
     def _acquire(self):
         self._token = self.client._gets(self.ns_key)
         return self
 
-    def __aexit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         pass
 
     def cas(self, value: Any, **kwargs) -> True:
