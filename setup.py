@@ -3,9 +3,7 @@ import re
 
 from setuptools import setup, find_packages
 
-REQUIRED = [
-    'timeout_decorator'
-]
+REQUIRED = []
 
 with open(
         os.path.join(
@@ -37,8 +35,7 @@ setup(
     packages=find_packages(),
     install_requires=REQUIRED,
     extras_require={
-        'redis:python_version<"3.7"': ['redis==2.10.6'],
-        'redis:python_version>="3.7"': ['redis==2.10.6'],
+        'redis"': ['redis>=2.10.6'],
         'msgpack': ['msgpack']
     }
 )

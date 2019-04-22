@@ -73,9 +73,6 @@ class RedisBackend:
                 "decode_responses": True,
                 "max_connections": self.max_connections,
             }
-            if not REDIS_BEFORE_ONE:
-                kwargs["create_connection_timeout"] = self.create_connection_timeout
-
             self._pool = redis.Redis(**kwargs)
 
         return self._pool
