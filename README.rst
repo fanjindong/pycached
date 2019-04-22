@@ -103,8 +103,6 @@ You can also setup cache aliases so its easy to reuse configurations
 
 .. code-block:: python
 
-  import asyncio
-
   from pycached import caches, SimpleMemoryCache, RedisCache
   from pycached.serializers import StringSerializer, PickleSerializer
 
