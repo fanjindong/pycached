@@ -3,7 +3,7 @@ import logging
 import os
 import time
 
-import timeout_decorator
+# import timeout_decorator
 
 from pycached import serializers
 
@@ -24,26 +24,26 @@ class API:
     def unregister(cls, func):
         API.CMDS.discard(func)
 
-    @classmethod
-    def timeout(cls, func):
-        """
-        This decorator sets a maximum timeout for a coroutine to execute. The timeout can be both
-        set in the ``self.timeout`` attribute or in the ``timeout`` kwarg of the function call.
-        I.e if you have a function ``get(self, key)``, if its decorated with this decorator, you
-        will be able to call it with ``get(self, "my_key", timeout=4)``.
-
-        Use 0 or None to disable the timeout.
-        """
-        NOT_SET = "NOT_SET"
-
-        @functools.wraps(func)
-        def _timeout(self, *args, timeout=NOT_SET, **kwargs):
-            timeout:int = self.timeout if timeout == NOT_SET else timeout
-            if timeout == 0 or timeout is None:
-                return func(self, *args, **kwargs)
-            return timeout_decorator.timeout(seconds=timeout, use_signals=False)(func)(self, *args, **kwargs)
-
-        return _timeout
+    # @classmethod
+    # def timeout(cls, func):
+    #     """
+    #     This decorator sets a maximum timeout for a coroutine to execute. The timeout can be both
+    #     set in the ``self.timeout`` attribute or in the ``timeout`` kwarg of the function call.
+    #     I.e if you have a function ``get(self, key)``, if its decorated with this decorator, you
+    #     will be able to call it with ``get(self, "my_key", timeout=4)``.
+    #
+    #     Use 0 or None to disable the timeout.
+    #     """
+    #     NOT_SET = "NOT_SET"
+    #
+    #     @functools.wraps(func)
+    #     def _timeout(self, *args, timeout=NOT_SET, **kwargs):
+    #         timeout:int = self.timeout if timeout == NOT_SET else timeout
+    #         if timeout == 0 or timeout is None:
+    #             return func(self, *args, **kwargs)
+    #         return timeout_decorator.timeout(seconds=timeout, use_signals=False)(func)(self, *args, **kwargs)
+    #
+    #     return _timeout
 
     @classmethod
     def pycached_enabled(cls, fake_return=None):
