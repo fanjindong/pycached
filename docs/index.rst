@@ -52,7 +52,6 @@ You can also setup cache aliases like in Django settings:
 
 In `examples folder <https://github.com/fanjindong/pycached/tree/master/examples>`_ you can check different use cases:
 
-- `Sanic, Aiohttp and Tornado <https://github.com/fanjindong/pycached/tree/master/examples/frameworks>`_
 - `Python object in Redis <https://github.com/fanjindong/pycached/blob/master/examples/python_object.py>`_
 - `Custom serializer for compressing data <https://github.com/fanjindong/pycached/blob/master/examples/serializer_class.py>`_
 - `TimingPlugin and HitMissRatioPlugin demos <https://github.com/fanjindong/pycached/blob/master/examples/plugins.py>`_
