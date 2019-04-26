@@ -73,6 +73,7 @@ Contents
   decorators
   locking
   testing
+  changelog
 
 Indices and tables
 ==================
