@@ -2,7 +2,7 @@ import json
 
 from marshmallow import Schema, fields, post_load
 
-from pycached import RedisCache
+from pycached import Cache
 
 
 class MyType:
@@ -28,7 +28,7 @@ def loads(value):
     return MyTypeSchema().loads(value).data
 
 
-cache = RedisCache(namespace="main")
+cache = Cache(Cache.REDIS, namespace="main")
 
 
 def serializer_function():

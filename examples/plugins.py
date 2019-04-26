@@ -1,7 +1,7 @@
 import logging
 import random
 
-from pycached import SimpleMemoryCache
+from pycached import Cache
 from pycached.plugins import HitMissRatioPlugin, TimingPlugin, BasePlugin
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class MyCustomPlugin(BasePlugin):
         logger.info("I'm the post_set hook being called with %s %s" % (args, kwargs))
 
 
-cache = SimpleMemoryCache(
+cache = Cache(
     plugins=[HitMissRatioPlugin(), TimingPlugin(), MyCustomPlugin()],
     namespace="main")
 

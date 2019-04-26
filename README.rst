@@ -59,8 +59,8 @@ Using a cache is as simple as
 
 .. code-block:: python
 
-    >>> from pycached import SimpleMemoryCache  # Here you can also use RedisCache and MemcachedCache
-    >>> cache = SimpleMemoryCache()
+    >>> from from pycached import Cache
+    >>> cache = Cache(Cache.MEMORY) # Here you can also use Cache.REDIS and Cache.MEMCACHED, default is Cache.MEMORY
     >>> cache.set('key', 'value')
     True
     >>> cache.get('key')
@@ -74,14 +74,14 @@ Or as a decorator
 
     from collections import namedtuple
 
-    from pycached import cached, RedisCache
+    from pycached import cached, Cache
     from pycached.serializers import PickleSerializer
     # With this we can store python objects in backends like Redis!
 
     Result = namedtuple('Result', "content, status")
 
 
-    @cached(ttl=10, cache=RedisCache, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
+    @cached(ttl=10, cache=Cache.REDIS, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
     def cached_call():
         print("Sleeping for three seconds zzzz.....")
         time.sleep(3)
@@ -92,19 +92,20 @@ Or as a decorator
         cached_call()
         cached_call()
         cached_call()
-        cache = RedisCache(endpoint="127.0.0.1", port=6379, namespace="main")
+        cache = Cache(Cache.REDIS, endpoint="127.0.0.1", port=6379, namespace="main")
         cache.delete("key")
 
     if __name__ == "__main__":
         run()
+
+The recommended approach to instantiate a new cache is using the `Cache` constructor. However you can also instantiate directly using `pycached.RedisCache`, `pycached.SimpleMemoryCache`.
 
 
 You can also setup cache aliases so its easy to reuse configurations
 
 .. code-block:: python
 
-  from pycached import caches, SimpleMemoryCache, RedisCache
-  from pycached.serializers import StringSerializer, PickleSerializer
+  from pycached import caches
 
   # You can use either classes or strings for referencing classes
   caches.set_config({

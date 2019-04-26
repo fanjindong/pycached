@@ -2,11 +2,11 @@ import logging
 import random
 import time
 
-from pycached import RedisCache
+from pycached import Cache
 from pycached.lock import OptimisticLock, OptimisticLockError
 
 logger = logging.getLogger(__name__)
-cache = RedisCache(endpoint='127.0.0.1', port=6379, namespace='main')
+cache = Cache(Cache.REDIS, endpoint='127.0.0.1', port=6379, namespace='main')
 
 
 def expensive_function():

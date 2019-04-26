@@ -1,8 +1,6 @@
 import logging
 
 from .backends import RedisCache,SimpleMemoryCache
-from .factory import caches
-from .decorators import cached, cached_stampede, multi_cached
 from ._version import __version__
 
 
@@ -21,4 +19,16 @@ else:
 
 
 
-__all__ = ("caches", "cached", "cached_stampede", "multi_cached", *__cache_types, "__version__")
+from .factory import caches, Cache  # noqa: E402
+from .decorators import cached, cached_stampede, multi_cached  # noqa: E402
+
+
+__all__ = (
+    "caches",
+    "Cache",
+    "cached",
+    "cached_stampede",
+    "multi_cached",
+    *__cache_types,
+    "__version__",
+)

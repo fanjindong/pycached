@@ -21,8 +21,8 @@ Using a cache is as simple as
 
 .. code-block:: python
 
-    >>> from pycached import SimpleMemoryCache
-    >>> cache = SimpleMemoryCache()
+    >>> from pycached import Cache
+    >>> cache = Cache()
     >>> cache.set('key', 'value')
     True
     >>> cache.get('key')

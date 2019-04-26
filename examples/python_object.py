@@ -1,10 +1,10 @@
 from collections import namedtuple
 
-from pycached import RedisCache
+from pycached import Cache
 from pycached.serializers import PickleSerializer
 
 MyObject = namedtuple("MyObject", ["x", "y"])
-cache = RedisCache(serializer=PickleSerializer(), namespace="main")
+cache = Cache(Cache.REDIS, serializer=PickleSerializer(), namespace="main")
 
 
 def complex_object():

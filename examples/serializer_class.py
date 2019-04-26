@@ -1,6 +1,6 @@
 import zlib
 
-from pycached import RedisCache
+from pycached import Cache
 from pycached.serializers import BaseSerializer
 
 
@@ -24,7 +24,7 @@ class CompressionSerializer(BaseSerializer):
         return decompressed
 
 
-cache = RedisCache(serializer=CompressionSerializer(), namespace="main")
+cache = Cache(Cache.REDIS, serializer=CompressionSerializer(), namespace="main")
 
 
 def serializer():

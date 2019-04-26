@@ -3,7 +3,7 @@ import string
 
 from marshmallow import fields, Schema, post_load
 
-from pycached import SimpleMemoryCache
+from pycached import Cache
 from pycached.serializers import BaseSerializer
 
 
@@ -46,7 +46,7 @@ class MarshmallowSerializer(Schema, BaseSerializer):
         strict = True
 
 
-cache = SimpleMemoryCache(serializer=MarshmallowSerializer(), namespace="main")
+cache = Cache(serializer=MarshmallowSerializer(), namespace="main")
 
 
 def serializer():

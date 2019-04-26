@@ -1,6 +1,6 @@
-from pycached import RedisCache
+from pycached import Cache
 
-cache = RedisCache(endpoint="127.0.0.1", port=6379, namespace="main")
+cache = Cache(Cache.REDIS, endpoint="127.0.0.1", port=6379, namespace="main")
 
 
 def redis():

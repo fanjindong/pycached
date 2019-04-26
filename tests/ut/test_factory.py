@@ -1,9 +1,12 @@
+from unittest.mock import patch
+
 import pytest
 
-from pycached import SimpleMemoryCache, RedisCache, caches
+from pycached import SimpleMemoryCache, RedisCache, caches, Cache
+from pycached.exceptions import InvalidCacheType
 from pycached.factory import _class_from_string, _create_cache
-from pycached.serializers import JsonSerializer, PickleSerializer
 from pycached.plugins import TimingPlugin, HitMissRatioPlugin
+from pycached.serializers import JsonSerializer, PickleSerializer
 
 
 def test_class_from_string():
@@ -28,6 +31,40 @@ def test_create_cache_with_everything():
     assert isinstance(redis.serializer, PickleSerializer)
     assert redis.serializer.encoding == "encoding"
     assert isinstance(redis.plugins[0], TimingPlugin)
+
+
+class TestCache:
+    def test_cache_types(self):
+        assert Cache.MEMORY == "memory"
+        assert Cache.REDIS == "redis"
+
+    @pytest.mark.parametrize("cache_type", [Cache.MEMORY, Cache.REDIS])
+    def test_new(self, cache_type):
+        kwargs = {"a": 1, "b": 2}
+        cache_class = Cache.get_protocol_class(cache_type)
+
+        with patch("pycached.{}.__init__".format(cache_class.__name__)) as init:
+            cache = Cache(cache_type, **kwargs)
+            assert isinstance(cache, cache_class)
+            init.assert_called_once_with(**kwargs)
+
+    def test_new_defaults_to_memory(self):
+        assert isinstance(Cache(), Cache.get_protocol_class(Cache.MEMORY))
+
+    def test_new_invalid_cache_raises(self):
+        with pytest.raises(InvalidCacheType) as e:
+            Cache("file")
+        assert str(e.value) == "Invalid cache type, you can only use {}".format(
+            list(Cache._PROTOCOL_MAPPING.keys())
+        )
+
+    @pytest.mark.parametrize("protocol", [Cache.MEMORY, Cache.REDIS])
+    def test_get_protocol_class(self, protocol):
+        assert Cache.get_protocol_class(protocol) == Cache._PROTOCOL_MAPPING[protocol]
+
+    def test_get_protocol_class_invalid(self):
+        with pytest.raises(KeyError):
+            Cache.get_protocol_class("http")
 
 
 class TestCacheHandler:

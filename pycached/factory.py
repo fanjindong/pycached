@@ -1,5 +1,8 @@
 from copy import deepcopy
 
+from pycached import SimpleMemoryCache, RedisCache
+from pycached.exceptions import InvalidCacheType
+
 
 def _class_from_string(class_path):
     class_name = class_path.split(".")[-1]
@@ -8,7 +11,6 @@ def _class_from_string(class_path):
 
 
 def _create_cache(cache, serializer=None, plugins=None, **kwargs):
-
     if serializer is not None:
         cls = serializer.pop("class")
         cls = _class_from_string(cls) if isinstance(cls, str) else cls
@@ -26,8 +28,33 @@ def _create_cache(cache, serializer=None, plugins=None, **kwargs):
     return instance
 
 
-class CacheHandler:
+class Cache:
+    MEMORY = "memory"
+    REDIS = "redis"
 
+    _PROTOCOL_MAPPING = {
+        "memory": SimpleMemoryCache,
+        "redis": RedisCache,
+    }
+
+    def __new__(cls, cache_type=MEMORY, **kwargs):
+        try:
+            cache_class = cls.get_protocol_class(cache_type)
+        except KeyError as e:
+            raise InvalidCacheType(
+                "Invalid cache type, you can only use {}".format(list(cls._PROTOCOL_MAPPING.keys()))
+            ) from e
+
+        instance = cache_class.__new__(cache_class, **kwargs)
+        instance.__init__(**kwargs)
+        return instance
+
+    @classmethod
+    def get_protocol_class(cls, protocol):
+        return cls._PROTOCOL_MAPPING[protocol]
+
+
+class CacheHandler:
     _config = {
         "default": {
             "cache": "pycached.SimpleMemoryCache",
