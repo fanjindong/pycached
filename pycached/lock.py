@@ -6,7 +6,7 @@ from pycached.base import BaseCache
 
 
 class RedLock:
-    """
+    """unused
     Implementation of `Redlock <https://redis.io/topics/distlock>`_
     with a single instance because pycached is focused on single
     instance cache.
