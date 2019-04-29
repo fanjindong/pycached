@@ -74,14 +74,14 @@ Or as a decorator
 
     from collections import namedtuple
 
-    from pycached import cached, Cache
+    from pycached import cached, Cache, RedisCache
     from pycached.serializers import PickleSerializer
     # With this we can store python objects in backends like Redis!
 
     Result = namedtuple('Result', "content, status")
 
 
-    @cached(ttl=10, cache=Cache.REDIS, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
+    @cached(ttl=10, cache=RedisCache, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
     def cached_call():
         print("Sleeping for three seconds zzzz.....")
         time.sleep(3)

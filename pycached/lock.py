@@ -1,7 +1,6 @@
 import asyncio
 import uuid
-
-from typing import Type, Union, Any
+from typing import Union, Any
 
 from pycached.base import BaseCache
 
@@ -63,7 +62,7 @@ class RedLock:
 
     _EVENTS = {}
 
-    def __init__(self, client: Type[BaseCache], key: str, lease: Union[int, float]):
+    def __init__(self, client: BaseCache, key: str, lease: Union[int, float]):
         self.client = client
         self.key = self.client._build_key(key + "-lock")
         self.lease = lease
@@ -134,7 +133,7 @@ class OptimisticLock:
     If the lock is created with an unexisting key, there will never be conflicts.
     """
 
-    def __init__(self, client: Type[BaseCache], key: str):
+    def __init__(self, client: BaseCache, key: str):
         self.client = client
         self.key = key
         self.ns_key = self.client._build_key(key)
@@ -150,7 +149,7 @@ class OptimisticLock:
     def __exit__(self, exc_type, exc_value, traceback):
         pass
 
-    def cas(self, value: Any, **kwargs) -> True:
+    def cas(self, value: Any, **kwargs) -> bool:
         """
         Checks and sets the specified value for the locked key. If the value has changed
         since the lock was created, it will raise an :class:`pycached.lock.OptimisticLockError`
