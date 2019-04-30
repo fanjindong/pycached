@@ -1,4 +1,4 @@
-import asyncio
+import time
 import uuid
 from typing import Union, Any
 
@@ -6,7 +6,7 @@ from pycached.base import BaseCache
 
 
 class RedLock:
-    """unused
+    """
     Implementation of `Redlock <https://redis.io/topics/distlock>`_
     with a single instance because pycached is focused on single
     instance cache.
@@ -75,17 +75,18 @@ class RedLock:
         self._value = str(uuid.uuid4())
         try:
             self.client._add(self.key, self._value, ttl=self.lease)
-            RedLock._EVENTS[self.key] = asyncio.Event()
+            RedLock._EVENTS[self.key] = False
         except ValueError:
             self._wait_for_release()
 
     def _wait_for_release(self):
-        try:
-            asyncio.wait_for(RedLock._EVENTS[self.key].wait(), self.lease)
-        except asyncio.TimeoutError:
-            pass
-        except KeyError:  # lock was released when wait_for was rescheduled
-            pass
+        while True:
+            if self.key not in RedLock._EVENTS:
+                break
+            time.sleep(0.01)
+            self.lease -= 0.01
+            if self.lease <= 0:
+                break
 
     def __exit__(self, exc_type, exc_value, traceback):
         self._release()
@@ -93,7 +94,7 @@ class RedLock:
     def _release(self):
         removed = self.client._redlock_release(self.key, self._value)
         if removed:
-            RedLock._EVENTS.pop(self.key).set()
+            RedLock._EVENTS.pop(self.key)
 
 
 class OptimisticLock:
