@@ -1,5 +1,4 @@
 import functools
-import itertools
 
 import redis
 
@@ -123,18 +122,18 @@ class RedisBackend:
     def _multi_set(self, pairs, ttl=None, _conn=None):
         ttl = ttl or 0
 
-        flattened = list(itertools.chain.from_iterable((key, value) for key, value in pairs))
+        flattened = {key: value for key, value in pairs}
 
         if ttl:
             self.__multi_set_ttl(_conn, flattened, ttl)
         else:
-            _conn.mset(*flattened)
+            _conn.mset(flattened)
 
         return True
 
     def __multi_set_ttl(self, conn, flattened, ttl):
         redis = conn.pipeline()
-        redis.mset(*flattened)
+        redis.mset(flattened)
         for key in flattened[::2]:
             redis.expire(key, timeout=ttl)
         redis.execute()
