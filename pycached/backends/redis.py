@@ -134,7 +134,7 @@ class RedisBackend:
     def __multi_set_ttl(self, conn, flattened, ttl):
         redis = conn.pipeline()
         redis.mset(flattened)
-        for key in flattened[::2]:
+        for key in flattened:
             redis.expire(key, timeout=ttl)
         redis.execute()
 
