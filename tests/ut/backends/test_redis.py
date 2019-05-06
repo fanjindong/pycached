@@ -206,8 +206,8 @@ class TestRedisBackend:
         redis._multi_set([(pytest.KEY, "value"), (pytest.KEY_1, "random")], ttl=1)
         assert redis_connection.pipeline.call_count == 1
         redis_connection.mset.assert_called_with({pytest.KEY: "value", pytest.KEY_1: "random"})
-        redis_connection.expire.assert_any_call(pytest.KEY, timeout=1)
-        redis_connection.expire.assert_any_call(pytest.KEY_1, timeout=1)
+        redis_connection.expire.assert_any_call(pytest.KEY, 1)
+        redis_connection.expire.assert_any_call(pytest.KEY_1, 1)
         assert redis_connection.execute.call_count == 1
 
     async def test_add(self, redis, redis_connection):

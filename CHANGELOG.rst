@@ -6,6 +6,16 @@ ChangeLog
 Versaion 0.0
 ------------
 
+0.0.9
+~~~~~
+
+    - Changes:
+        -
+
+    - Fixes:
+        - fix redis.mset
+
+
 0.0.7
 ~~~~~
 

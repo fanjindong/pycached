@@ -135,7 +135,7 @@ class RedisBackend:
         redis = conn.pipeline()
         redis.mset(flattened)
         for key in flattened:
-            redis.expire(key, timeout=ttl)
+            redis.expire(key, ttl)
         redis.execute()
 
     @conn
