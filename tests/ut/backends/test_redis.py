@@ -26,7 +26,7 @@ def redis_connection():
     conn.flushdb = Mock()
     conn.eval = Mock()
     conn.keys = Mock()
-    conn.multi_exec = MagicMock(return_value=conn)
+    conn.pipeline = MagicMock(return_value=conn)
     conn.execute = Mock()
     return conn
 
@@ -204,7 +204,7 @@ class TestRedisBackend:
 
     async def test_multi_set_with_ttl(self, redis, redis_connection):
         redis._multi_set([(pytest.KEY, "value"), (pytest.KEY_1, "random")], ttl=1)
-        assert redis_connection.multi_exec.call_count == 1
+        assert redis_connection.pipeline.call_count == 1
         redis_connection.mset.assert_called_with(pytest.KEY, "value", pytest.KEY_1, "random")
         redis_connection.expire.assert_any_call(pytest.KEY, timeout=1)
         redis_connection.expire.assert_any_call(pytest.KEY_1, timeout=1)
