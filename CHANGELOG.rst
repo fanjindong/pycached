@@ -12,10 +12,11 @@ Versaion 0.0
     - Changes:
         - add Cache.from_url
         - add CACHE_CACHES
-        - set `Jan 11, 2019`
+        - add caches.add function
+        - git log to `2019-02-15`
 
     - Fixes:
-        -
+        - msgpack serializer
 
 0.0.9
 ~~~~~
