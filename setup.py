@@ -36,7 +36,7 @@ setup(
     install_requires=REQUIRED,
     extras_require={
         'redis"': ['redis>=2.10.6'],
-        'msgpack': ['msgpack']
+        'msgpack': ['msgpack>=0.5.5']
     }
 )
 
