@@ -109,6 +109,9 @@ class SimpleMemoryBackend:
 
         return 0
 
+    @classmethod
+    def parse_uri_path(cls, path):
+        return {}
 
 class SimpleMemoryCache(SimpleMemoryBackend, BaseCache):
     """

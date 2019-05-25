@@ -14,6 +14,7 @@ You can define your custom plugin by inheriting from `BasePlugin`_ and overridin
 
 .. WARNING::
   Both pre and post hooks are executed awaiting the coroutine. If you perform expensive operations with the hooks, you will add more latency to the command being executed and thus, there are more probabilities of raising a timeout error.
+If a timeout error is raised, be aware that previous actions **won't be rolled back**.
 
 A complete example of using plugins:
 

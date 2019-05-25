@@ -1,11 +1,10 @@
 import logging
 
-from .backends import RedisCache,SimpleMemoryCache
 from ._version import __version__
-
+from .backends import RedisCache, SimpleMemoryCache
 
 logger = logging.getLogger(__name__)
-__cache_types = [RedisCache]
+CACHE_CACHES = {"memory": SimpleMemoryCache}
 
 try:
     import redis
@@ -14,14 +13,11 @@ except ImportError:
 else:
     from pycached.backends.redis import RedisCache
 
-    __cache_types.append(RedisCache)
+    CACHE_CACHES["redis"] = RedisCache
     del redis
-
-
 
 from .factory import caches, Cache  # noqa: E402
 from .decorators import cached, cached_stampede, multi_cached  # noqa: E402
-
 
 __all__ = (
     "caches",
@@ -29,6 +25,6 @@ __all__ = (
     "cached",
     "cached_stampede",
     "multi_cached",
-    *__cache_types,
+    *list(CACHE_CACHES.values()),
     "__version__",
 )

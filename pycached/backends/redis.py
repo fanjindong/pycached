@@ -52,11 +52,11 @@ class RedisBackend:
     ):
         super().__init__(**kwargs)
         self.endpoint = endpoint
-        self.port = port
-        self.db = db
+        self.port = int(port)
+        self.db = int(db)
         self.password = password
-        self.max_connections = max_connections
-        self.create_connection_timeout = create_connection_timeout
+        self.max_connections = int(max_connections)
+        self.create_connection_timeout = float(create_connection_timeout) if create_connection_timeout else None
         self._loop = loop
         self._pool = None
 
@@ -77,13 +77,13 @@ class RedisBackend:
         return self._pool
 
     def _close(self, *args, **kwargs):
-        pass
+        return None
 
     def acquire_conn(self):
         return self._get_pool()
 
     def release_conn(self, _conn):
-        pass
+        return None
 
     @conn
     def _get(self, key, _conn=None):
@@ -157,7 +157,7 @@ class RedisBackend:
     def _increment(self, key, delta, _conn=None):
         try:
             return _conn.incrby(key, delta)
-        except redis.errors.ReplyError:
+        except redis.exceptions.RedisError:
             raise TypeError("Value is not an integer") from None
 
     @conn
@@ -185,6 +185,21 @@ class RedisBackend:
 
     def _redlock_release(self, key, value):
         return self._raw("eval", self.RELEASE_SCRIPT, [key], [value])
+
+    @classmethod
+    def parse_uri_path(self, path):
+        """
+        Given a uri path, return the Redis specific configuration
+        options in that path string according to iana definition
+        http://www.iana.org/assignments/uri-schemes/prov/redis
+        :param path: string containing the path. Example: "/0"
+        :return: mapping containing the options. Example: {"db": "0"}
+        """
+        options = {}
+        db, *_ = path[1:].split("/")
+        if db:
+            options["db"] = db
+        return options
 
 
 class RedisCache(RedisBackend, BaseCache):

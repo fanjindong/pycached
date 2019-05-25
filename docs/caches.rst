@@ -48,6 +48,14 @@ BaseCache
 .. autoclass:: pycached.base.BaseCache
   :members:
 
+..  _cache:
+
+Cache
+-----
+
+.. autoclass:: pycached.Cache
+  :members:
+
 
 ..  _rediscache:
 
