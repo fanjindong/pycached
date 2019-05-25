@@ -6,6 +6,17 @@ ChangeLog
 Versaion 0.0
 ------------
 
+0.0.10
+~~~~~
+
+    - Changes:
+        - add Cache.from_url
+        - add CACHE_CACHES
+        - set `Jan 11, 2019`
+
+    - Fixes:
+        -
+
 0.0.9
 ~~~~~
 
